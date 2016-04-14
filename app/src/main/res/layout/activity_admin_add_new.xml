@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/parent"
+    tools:context="com.example.hesolutions.horizon.AdminAddNew">
+
+
+    <RelativeLayout
+        android:id="@+id/relativeblur"
+        android:layout_width="750dp"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageView"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@+id/relativeblur"
+        android:layout_marginLeft="20dp"
+        >
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/addNewUser"
+            android:visibility="gone">
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/MSG"
+                android:hint="Enter User Name"
+                android:singleLine="true"
+                android:maxLength="14"
+                android:imeOptions="actionDone"
+                />
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_marginTop="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/saveforevent"
+                android:id="@+id/SAVE"
+                android:layout_below="@+id/CODE"
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="10"
+                android:maxLength="4"
+                android:id="@+id/CODE"
+                android:hint="Enter the password"
+                android:layout_below="@+id/MSG"
+                android:layout_alignLeft="@+id/MSG"
+                android:layout_alignStart="@+id/MSG"
+                />
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/addnewsector"
+            android:visibility="gone"
+            android:layout_above="@+id/cancel">
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/NameS"
+                android:hint="Enter Sector Name"
+                android:singleLine="true"
+                android:maxLength="14"
+                android:imeOptions="actionDone"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"></EditText>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/saveforevent"
+                android:id="@+id/savesector"
+                android:layout_centerVertical="true"
+                android:layout_below="@+id/NameS" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/addnewdevice"
+            android:visibility="gone"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_above="@+id/cancel"
+            >
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/NameD"
+                android:hint="Enter Device Name"
+                android:singleLine="true"
+                android:maxLength="14"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:imeOptions="actionDone"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:background="@drawable/saveforevent"
+                android:layout_marginTop="50dp"
+                android:id="@+id/savedevice"
+                android:layout_centerVertical="true"
+                android:layout_below="@+id/NameD" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/assignuser"
+            android:layout_marginBottom="30dp"
+            android:layout_alignParentBottom="true">
+            <ListView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/assignsector"
+                android:divider="@color/transparent"
+                android:dividerHeight="2dp"
+                android:scrollbars="none"
+                android:layout_above="@+id/Apply"
+                />
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:background="@drawable/saveforevent"
+                android:id="@+id/Apply"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/assigndevice"
+            android:layout_marginBottom="30dp"
+            android:layout_alignParentBottom="true">
+            <ListView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/deviceassign"
+                android:divider="@color/transparent"
+                android:dividerHeight="2dp"
+                android:scrollbars="none"
+                android:layout_above="@+id/Applydevice"
+                />
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:background="@drawable/saveforevent"
+                android:id="@+id/Applydevice"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                />
+
+        </RelativeLayout>
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:background="@drawable/cancelforevent"
+            android:id="@+id/cancel"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="30dp"
+            android:layout_alignParentBottom="true"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

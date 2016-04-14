@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/lib/com.example.hesolutions.mylibrary"
+    android:paddingBottom="2dp"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="10dp"
+    tools:context="com.example.hesolutions.horizon.GlobalCalendar">
+
+    <com.mylibrary.WeekView
+        android:id="@+id/weekView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:eventTextColor="@android:color/white"
+        app:textSize="12sp"
+        app:hourHeight="60dp"
+        app:headerColumnPadding="8dp"
+        app:headerColumnTextColor="#8f000000"
+        app:headerRowPadding="12dp"
+        app:columnGap="8dp"
+        app:noOfVisibleDays="3"
+        app:headerRowBackgroundColor="#ffefefef"
+        app:dayBackgroundColor="#05000000"
+        app:todayBackgroundColor="#1848adff"
+        app:headerColumnBackground="#ffffffff"
+        android:layout_marginTop="50dp" />
+
+
+    <Button
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/addevent"
+        android:background="@drawable/addbutton"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:text="TODAY"
+        android:textColor="@color/white"
+        android:id="@+id/today"
+        android:background="@drawable/buttonclick"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true" />
+
+    <Button
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:text="1 DAY"
+        android:textColor="@color/white"
+        android:background="@drawable/buttonunclick"
+        android:id="@+id/oneday"
+        android:layout_marginLeft="20dp"
+        android:layout_alignBottom="@+id/today"
+        android:layout_toRightOf="@+id/today"
+        android:layout_toEndOf="@+id/today" />
+
+    <Button
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:textColor="@color/white"
+        android:background="@drawable/buttonclicked"
+        android:text="3 DAYS"
+        android:id="@+id/threedays"
+        android:layout_marginLeft="20dp"
+        android:layout_alignBottom="@+id/oneday"
+        android:layout_toRightOf="@+id/oneday"
+        android:layout_toEndOf="@+id/oneday" />
+
+    <Button
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:textColor="@color/white"
+        android:background="@drawable/buttonunclick"
+        android:text="WEEK"
+        android:layout_marginLeft="20dp"
+        android:id="@+id/sevendays"
+        android:layout_alignBottom="@+id/threedays"
+        android:layout_toRightOf="@+id/threedays"
+        android:layout_toEndOf="@+id/threedays" />
+
+</RelativeLayout>
