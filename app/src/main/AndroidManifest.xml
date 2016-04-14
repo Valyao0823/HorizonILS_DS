@@ -43,6 +43,7 @@
         <activity android:name=".PaintPage" />
         <activity android:name=".AdminPage" />
         <activity android:name=".ActivityAdminStack" />
+        <activity android:name=".ActivityStack" />
         <activity android:name=".AdminAddNew" />
         <activity android:name="com.zxing.activity.CaptureActivity" />
         <activity android:name=".TabviewUser" />

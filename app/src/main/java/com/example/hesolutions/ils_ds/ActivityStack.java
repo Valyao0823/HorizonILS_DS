@@ -43,6 +43,7 @@ public class ActivityStack extends ActivityGroup {
         if (window != null) {
             stack.push(id);
             setContentView(window.getDecorView());
+            setContentView(window.getDecorView());
         }
     }
 

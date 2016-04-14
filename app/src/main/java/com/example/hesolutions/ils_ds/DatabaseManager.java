@@ -94,11 +94,12 @@ public class DatabaseManager {
 
     public String getUserName(String password)
     {
-        Cursor cursor = this.mDataBase.rawQuery("SELECT Password FROM UserInformation WHERE Password = ?",  new String[]{String.valueOf(password)});
+        Cursor cursor = this.mDataBase.rawQuery("SELECT * FROM UserInformation WHERE Password = ?",  new String[]{String.valueOf(password)});
         if (cursor == null) {
             return null;
         }
-        return cursor.getString(0);
+        cursor.moveToFirst();
+        return cursor.getString(1);
     }
 
     public String getColor(String password)
@@ -107,6 +108,7 @@ public class DatabaseManager {
         if (cursor == null) {
             return null;
         }
+        cursor.moveToFirst();
         return cursor.getString(0);
     }
     //========================================Sector=======================================
