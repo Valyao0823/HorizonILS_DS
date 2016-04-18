@@ -69,15 +69,7 @@ public class GlobalCalendar extends Activity{
         mMonthChangeListener = new MonthLoader.MonthChangeListener() {
             @Override
             public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
-                // Populate the week view with some events.
-                /*
-                List<WeekViewEvent> events;
-                events = DataManager.getInstance().getevents();
-                */
-
-                List<WeekViewEvent> events;
-                // Load the events;
-                events = new ArrayList<>();
+                List<WeekViewEvent> events = DatabaseManager.getInstance().loadEvent();
                 return events;
             }
 
@@ -147,9 +139,8 @@ public class GlobalCalendar extends Activity{
                 Bitmap bitmap = getScreenShot(rootView);
                 DataManager.getInstance().setBitmap(bitmap);
 
-                /*
-                HashMap<String, HashMap<String, ArrayList<Device>>> sector = DataManager.getInstance().getsector();
-                HashMap<String, ArrayList<Device>> sectorinformation = sector.get(loginname);
+
+                ArrayList<String> sectorinformation = DatabaseManager.getInstance().showSectorforuser(loginname);
                 if (sectorinformation!=null && !sectorinformation.isEmpty()) {
                     Intent startNewActivityIntent = new Intent(GlobalCalendar.this, CalendarTask.class);
                     startNewActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -159,7 +150,7 @@ public class GlobalCalendar extends Activity{
                 }else{
                     Toast.makeText(GlobalCalendar.this, "You have not been assigned to any sector yet.", Toast.LENGTH_SHORT).show();
                 }
-                */
+
             }
         });
 

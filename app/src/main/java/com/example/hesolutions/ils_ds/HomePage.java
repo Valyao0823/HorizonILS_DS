@@ -375,6 +375,7 @@ public class HomePage extends Activity {
                         DataManager.getInstance().setcolorname(color);
                         clearPinCode();
                         startActivity(startNewActivityIntent);
+
                     } else {
                         Animation shake = AnimationUtils.loadAnimation(HomePage.this, R.anim.shake_animation);
                         findViewById(R.id.radioButton1).startAnimation(shake);

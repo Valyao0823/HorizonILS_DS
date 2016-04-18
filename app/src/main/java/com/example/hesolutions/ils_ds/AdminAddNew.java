@@ -346,7 +346,6 @@ public class AdminAddNew extends Activity {
             @Override
             public void onClick(View v) {
                 String name =  NameS.getText().toString();
-                boolean uniquesectorname = true;
                 if (name.equals("")) {
                     Toast.makeText(AdminAddNew.this, "Sector name cannot be empty", Toast.LENGTH_SHORT).show();
                 }else if (name.contains(" ")){
@@ -359,7 +358,8 @@ public class AdminAddNew extends Activity {
                         NameS.setText("");
                         Toast.makeText(AdminAddNew.this, "This sector name already exists", Toast.LENGTH_SHORT).show();
                     }else{
-                        DatabaseManager.getInstance().addSector(name, userName, null);
+                        DatabaseManager.getInstance().addSector(name);
+                        DatabaseManager.getInstance().assignSector(userName, name);
                         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                         ActivityAdminStack activityAdminStack = (ActivityAdminStack) getParent();
@@ -384,8 +384,8 @@ public class AdminAddNew extends Activity {
                     if (DatabaseManager.getInstance().getDeviceList().contains(name)) {
                         Toast.makeText(AdminAddNew.this, "This device name already exists", Toast.LENGTH_SHORT).show();
                     } else {
-
-                        DatabaseManager.getInstance().addDevice(sectorName, name);
+                        //get the nude of the module
+                        //DatabaseManager.getInstance().addDevice(name, nude, sectorName);
                         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                         Toast.makeText(getApplicationContext(), "Data saved successfully!", Toast.LENGTH_LONG).show();

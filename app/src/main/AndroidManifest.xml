@@ -48,7 +48,8 @@
         <activity android:name="com.zxing.activity.CaptureActivity" />
         <activity android:name=".TabviewUser" />
         <activity android:name=".GlobalCalendar" />
-        <activity android:name=".ControlPage"></activity>
+        <activity android:name=".ControlPage" />
+        <activity android:name=".CalendarTask"></activity>
     </application>
 
 </manifest>

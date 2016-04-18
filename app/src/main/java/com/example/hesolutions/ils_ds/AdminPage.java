@@ -220,7 +220,7 @@ public class AdminPage extends Activity {
         addsector.setVisibility(View.VISIBLE);
         devicelistlayout.setVisibility(View.INVISIBLE);
         ListView sectorlist = (ListView) findViewById(R.id.sectorlist);
-        sectornamelist = DatabaseManager.getInstance().getSectorList();
+        sectornamelist = DatabaseManager.getInstance().showSectorforuser(userName);
         if (sectornamelist!=null && !sectornamelist.isEmpty())
         {
             sectoradapter = new SectorCustomListAdapter(this, sectornamelist);

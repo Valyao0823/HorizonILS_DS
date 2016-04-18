@@ -27,13 +27,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public DatabaseHelper(Context context, String dataBaseName, String srcDataBaseName) {
         super(context, dataBaseName, null, DATABASE_VERSION);
         this.createDatabase = false;
+        this.context = context;
         this.mDataBaseName = dataBaseName;
         this.mSrcDataBaseName = srcDataBaseName;
-        this.context = context;
+        /*
+        File root = Environment.getExternalStorageDirectory();
+        File dir = new File(root.getAbsolutePath() + "/horizon_ds");
+        File file = new File(dir, this.mSrcDataBaseName);
+        this.mFile = file;
+        */
         this.mFile = context.getDatabasePath(this.mDataBaseName);
+        System.out.println(mFile.toString() + "********** ");
         if (!this.mFile.exists()) {
             this.createDatabase = true;
         }
+
     }
 
     public synchronized SQLiteDatabase getWritableDatabase() {
@@ -43,7 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (this.createDatabase) {
             this.createDatabase = false;
             try {
-                database = copyDatabase(database);
+                database = copyDatabase();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -69,7 +77,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return writableDatabase;
     }
 
-    private SQLiteDatabase copyDatabase(SQLiteDatabase database) throws IOException {
+    private SQLiteDatabase copyDatabase() throws IOException {
         InputStream input = this.context.getAssets().open(this.mSrcDataBaseName);
         OutputStream output = new FileOutputStream(this.mFile);
         copy(input, output);
@@ -97,4 +105,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             count += n;
         }
     }
+
+
 }

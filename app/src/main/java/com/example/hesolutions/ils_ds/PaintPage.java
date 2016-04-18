@@ -44,10 +44,10 @@ public class PaintPage extends Activity{
     private static int RESULT_LOAD_IMG = 1;
     String imgDecodableString;
     String sectorsave = "";
-    ArrayList<String> sectorlist = new ArrayList<>();
     Handler myHandler;
     Runnable myRunnable;
     int Selected_Device = -1;
+    ArrayList<String> sectorlist = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -257,7 +257,7 @@ public class PaintPage extends Activity{
             }
         });
 
-       // LoadList();
+        LoadList();
     }
     public void paintClicked(View view){
         //use chosen color
@@ -332,19 +332,10 @@ public class PaintPage extends Activity{
             }
         }
     }
-    /*
+
     public void LoadList()
     {
-        HashMap<String, HashMap> sector = DataManager.getInstance().getsector();
-        for (Map.Entry<String, HashMap> entry : sector.entrySet()) {
-            HashMap<String, ArrayList> value = entry.getValue();
-            for (Map.Entry<String, ArrayList> entrys : value.entrySet()) {
-                String sectorname = entrys.getKey();
-                if (!sectorlist.contains(sectorname)) {
-                    sectorlist.add(sectorname);
-                }
-            }
-        }
+        sectorlist = DatabaseManager.getInstance().getSectorList();
         ListView sectorlistlayout = (ListView)findViewById(R.id.sectorlistlayout);
         TextView blank = (TextView)findViewById(R.id.textView13);
         if (!sectorlist.isEmpty()) {
@@ -386,7 +377,7 @@ public class PaintPage extends Activity{
             sectorlistlayout.setVisibility(View.GONE);
         }
     }
-    */
+
     public class MyAdapter extends ArrayAdapter<String> {
 
         private Activity context;

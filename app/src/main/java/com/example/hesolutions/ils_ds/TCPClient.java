@@ -1,14 +1,19 @@
 package com.example.hesolutions.ils_ds;
 
-
+import android.os.Message;
+import android.provider.SyncStateContract;
 import android.util.Log;
+import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * Description
@@ -51,6 +56,9 @@ public class TCPClient {
         }
     }
 
+    public boolean isConnected() {return mRun;}
+
+
     /**
      * Close the connection and release the members
      */
@@ -88,14 +96,10 @@ public class TCPClient {
 
             try {
                 Log.i("Debug", "inside try catch");
-                //sends the message to the server
                 mBufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-
                 //receives the message which the server sends back
                 mBufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 // send login name
-                //in this while the client listens for the messages sent by the server
-                sendMessage(clientmessage);
                 while (mRun) {
                     mServerMessage = mBufferIn.readLine();
                     if (mServerMessage != null && mMessageListener != null) {
@@ -130,9 +134,5 @@ public class TCPClient {
         public void messageReceived(String message);
     }
 
-    public void setMessage(String message)
-    {
-        this.clientmessage = message;
-    }
 }
 
