@@ -91,7 +91,7 @@ public class GlobalCalendar extends Activity{
                     alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
 
-                            //Remove the event
+                            DatabaseManager.getInstance().removeEvent(event);
                             dialog.cancel();
                             Intent startNewActivityIntent = new Intent(getIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                             ActivityStack activityStack = (ActivityStack) getParent();

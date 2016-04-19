@@ -276,7 +276,7 @@ public class CalendarTask extends Activity {
                         Group group = choosegrouplist.get(i);
                         if (!group.getName().equals("Select All")){
                             if (group.getSelected() == true) {
-                                sectornamelist += String.valueOf(group.getName()) + "+";
+                                sectornamelist += String.valueOf(group.getName()) + ",";
                             }
                         }
                     }
@@ -308,7 +308,6 @@ public class CalendarTask extends Activity {
                                             Thread[] threads = new Thread[7];
                                             for (int i = 0; i < weeks; i++) {
                                                 final int j = i;
-                                                final Calendar today = Calendar.getInstance();
                                                 threads[0] = new Thread() {
                                                     public void run() {
                                                         if (Monday.isChecked()) {

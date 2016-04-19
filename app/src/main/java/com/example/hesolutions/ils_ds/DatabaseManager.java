@@ -118,6 +118,37 @@ public class DatabaseManager {
         cursor.moveToFirst();
         return cursor.getString(0);
     }
+
+    public String getPassword(String username)
+    {
+        Cursor cursor = this.mDataBase.rawQuery("SELECT Password FROM UserTable WHERE UserName = ?",  new String[]{String.valueOf(username)});
+        if (cursor == null) {
+            return null;
+        }
+        cursor.moveToFirst();
+        return cursor.getString(0);
+    }
+    public boolean updateUser(String username, String password) {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("UPDATE UserTable SET Password = ? WHERE UserName = ?", new Object[]{String.valueOf(password), String.valueOf(username)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
+
+    public boolean removeUser(String username) {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM UserTable WHERE UserName = ?", new String[]{String.valueOf(username)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
     //========================================Sector=======================================
 
     public boolean addSector(String sectorname)
@@ -146,19 +177,35 @@ public class DatabaseManager {
         cursor.close();
         return sectorlist;
     }
+
+    public boolean removeSector(String sectorname)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM SectorTable WHERE SectorName = ?", new Object[]{String.valueOf(sectorname)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
     //========================================Device=======================================
 
-    public boolean addDevice(String devicename, long nude, String sectorname)
+    public boolean addDevice(String devicename, int nude, String sectorname, String companyname, String location, String devicetype, String devicedetail)
     {
         Object[] objArr = null;
         if (this.mDataBase != null) {
-            objArr = new Object[5];
+            objArr = new Object[9];
             objArr[0] = String.valueOf(devicename);
-            objArr[1] = Long.valueOf(nude);
-            objArr[2] = Short.valueOf((short)0); // defalut value of intensity
-            objArr[3] = Short.valueOf((short)0); // defalut value of control
+            objArr[1] = Integer.valueOf(nude);
+            objArr[2] = Integer.valueOf((short)0); // defalut value of intensity
+            objArr[3] = Integer.valueOf((short)0); // defalut value of control
             objArr[4] = String.valueOf(sectorname);
-            this.mDataBase.execSQL("INSERT INTO DeviceTable VALUES(?,?,?,?,?)", objArr);
+            objArr[5] = String.valueOf(companyname);
+            objArr[6] = String.valueOf(location);
+            objArr[7] = String.valueOf(devicetype);
+            objArr[8] = String.valueOf(devicedetail);
+            this.mDataBase.execSQL("INSERT INTO DeviceTable VALUES(?,?,?,?,?,?,?,?,?)", objArr);
         }
         return $assertionsDisabled;
     }
@@ -220,6 +267,18 @@ public class DatabaseManager {
         cursor.close();
         return  control;
     }
+
+    public boolean updateDevicefromSector(String devicename, String sectorname)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("UPDATE DeviceTable SET SectorName = ? WHERE DeviceName = ?", new String[]{String.valueOf(sectorname),String.valueOf(devicename)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
     //============================================Mapping===========================================
 
     public boolean assignSector(String username, String sectorname)
@@ -234,6 +293,21 @@ public class DatabaseManager {
         return $assertionsDisabled;
     }
 
+    public ArrayList<String> showSectors()
+    {
+        ArrayList<String> sectorlist = new ArrayList<>();
+        Cursor cursor = this.mDataBase.rawQuery("SELECT SectorName FROM MappingTable", null);
+        if (cursor == null) {
+            return null;
+        }
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            sectorlist.add(cursor.getString(0));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return sectorlist;
+    }
     public ArrayList<String> showSectorforuser(String username)
     {
         ArrayList<String> sectorlist = new ArrayList<>();
@@ -250,6 +324,29 @@ public class DatabaseManager {
         return sectorlist;
     }
 
+    public boolean removeSectorforuser(String username, String sectorname)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM MappingTable WHERE UserName = ? AND SectorName = ?", new Object[]{String.valueOf(username), String.valueOf(sectorname)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
+
+    public boolean removeUserfromMapping(String username)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM MappingTable WHERE UserName = ?", new Object[]{String.valueOf(username)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
     //===============================================Events===========================================================
     public boolean addEvents(long id, long startTime, long finishTime, String sectorlist, String eventname, Integer color, int intensity)
     {
@@ -263,7 +360,6 @@ public class DatabaseManager {
             objArr[4] = String.valueOf(eventname);
             objArr[5] = Integer.valueOf(color);
             objArr[6] = Integer.valueOf(intensity);
-            System.out.println("*********** starttime " + startTime);
             this.mDataBase.execSQL("INSERT INTO EventsTable VALUES(?,?,?,?,?,?,?)", objArr);
         }
         return $assertionsDisabled;
@@ -297,7 +393,6 @@ public class DatabaseManager {
             Calendar finishTime = Calendar.getInstance();
             Date ft = new Date(cursor.getLong(2));
             finishTime.setTime(ft);
-            System.out.println("******************* " + startTime.getTime());
             WeekViewEvent weekViewEvent = new WeekViewEvent(cursor.getInt(0), cursor.getString(4), startTime, finishTime,
                     cursor.getInt(5), cursor.getString(3), cursor.getInt(6));
             eventslist.add(weekViewEvent);
@@ -305,6 +400,30 @@ public class DatabaseManager {
         }
         cursor.close();
         return eventslist;
+    }
+
+    public boolean removeEvent(WeekViewEvent event)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM EventsTable WHERE ID = ?", new Object[]{Long.valueOf(event.getId())});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
+
+    public boolean removeEventforuser(String username)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM EventsTable WHERE Name = ?", new Object[]{String.valueOf(username)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
     }
 }
 

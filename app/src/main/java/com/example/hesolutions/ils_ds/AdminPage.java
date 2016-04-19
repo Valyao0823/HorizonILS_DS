@@ -3,11 +3,15 @@ package com.example.hesolutions.ils_ds;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -15,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +27,7 @@ import android.widget.Toast;
 import com.google.common.collect.BiMap;
 import com.zxing.activity.CaptureActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,14 +37,13 @@ public class AdminPage extends Activity {
     ArrayList<String> usernamelist, sectornamelist, devicenamelist;
     TextView inforsumuser,inforsumsector,inforsumdevice;
     Button adduser, addsector, adddevice;
-    RelativeLayout userlistlayout, sectorlistlayout, devicelistlayout, infor, progresslayout;
+    RelativeLayout userlistlayout, sectorlistlayout, devicelistlayout, infor;
     String userName = "";
     String sectorName = "";
     String deviceName = "";
     UserCustomListAdapter useradapter;
     SectorCustomListAdapter sectoradapter;
     DeviceCustomListAdapter deviceadapter;
-    final ArrayList<String> names = new ArrayList<>();
     int Selected_User = -1;
     int Selected_Sector = -1;
     int Selected_Device = -1;
@@ -51,7 +56,6 @@ public class AdminPage extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_page);
-        progresslayout = (RelativeLayout)findViewById(R.id.progresslayout);
         userlistlayout = (RelativeLayout)findViewById(R.id.userlistlayout);
         sectorlistlayout = (RelativeLayout)findViewById(R.id.sectorlistlayout);
         devicelistlayout = (RelativeLayout)findViewById(R.id.devicelistlayout);
@@ -124,7 +128,7 @@ public class AdminPage extends Activity {
                             Bitmap bitmap = getScreenShot(rootView);
                             DataManager.getInstance().setBitmap(bitmap);
                             Intent startNewActivityIntent = new Intent(AdminPage.this, AdminAddNew.class);
-                            startNewActivityIntent.putExtra("Case", 7);
+                            startNewActivityIntent.putExtra("Case", 6);
                             startNewActivityIntent.putExtra("userName", userName);
                             startNewActivityIntent.putExtra("sectorName", sectorName);
                             ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
@@ -276,8 +280,7 @@ public class AdminPage extends Activity {
         devicelistlayout.setVisibility(View.VISIBLE);
         adddevice.setVisibility(View.VISIBLE);
         ListView deviceList = (ListView) findViewById(R.id.devicelist);
-        devicenamelist = DatabaseManager.getInstance().getDeviceList();
-        if (devicenamelist.contains("null"))devicenamelist.remove("null");
+        devicenamelist = DatabaseManager.getInstance().showDeviceforsector(sectorName);
         if  (devicenamelist!=null && !devicenamelist.isEmpty())
         {
             deviceadapter = new DeviceCustomListAdapter(this, devicenamelist);
@@ -326,19 +329,19 @@ public class AdminPage extends Activity {
     }
 
 
-    /*
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         if (v.getId()==R.id.sectorlist) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-            sectorName = sectorArray.get(info.position);
+            sectorName = sectornamelist.get(info.position);
             menu.setHeaderTitle(sectorName);
             menu.add(0, 0, 0, "Share");
             menu.add(0, 1, 0, "Remove");
         }
         if (v.getId() == R.id.userlist) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            userName = names.get(info.position);
+            userName = usernamelist.get(info.position);
             menu.setHeaderTitle(userName);
             menu.add(0, 2, 0, "Delete");
             menu.add(0, 4, 0, "Change Password");
@@ -346,7 +349,7 @@ public class AdminPage extends Activity {
         if (v.getId() == R.id.devicelist)
         {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            deviceName = deviceAdptername.get(info.position);
+            deviceName = devicenamelist.get(info.position);
             menu.setHeaderTitle(deviceName);
             menu.add(0, 3, 0, "Delete");
         }
@@ -355,7 +358,6 @@ public class AdminPage extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
         final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
         int menuItemIndex = item.getItemId();
-        sector = DataManager.getInstance().getsector();
         if (menuItemIndex == 1)
         {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(AdminPage.this.getParent());
@@ -363,80 +365,23 @@ public class AdminPage extends Activity {
             alertDialog.setMessage("Do you want to remove the sector?");
             alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    ArrayList<Device> array = (ArrayList<Device>) sector.get(userName).get(sectorName);
-                    //// delete the lights if this sector is the last one contains device information
-                    ProgressBar progressBar = (ProgressBar)findViewById(R.id.progressBar);
-                    progresslayout.setClickable(true);
-                    progressBar.setVisibility(View.VISIBLE);
-
-                    Runnable r = new Runnable() {
-                        public void run() {
-                            RemoveEvents(userName, sectorName);
-                        }
-                    };
-
-                    new Thread(r).start();
-
-                    boolean deletedevice = true;
-                    HashMap<String, HashMap> sector = DataManager.getInstance().getsector();
-                    if (!sector.isEmpty()) {
-                        for (Map.Entry<String, HashMap> entry : sector.entrySet()) {
-                            String name = (String) entry.getKey();
-                            if (!name.equals(userName)) {
-                                //check if any other user contains the sector
-                                HashMap<String, ArrayList<Device>> sectorinfo = entry.getValue();
-                                for (Map.Entry<String, ArrayList<Device>> entrys : sectorinfo.entrySet()) {
-                                    if (entrys.getKey().equals(sectorName)) {
-                                        deletedevice = false;
-                                    }
-                                }
-                            }
-                        }
+                    if (userName!=null && sectorName!=null) DatabaseManager.getInstance().removeSectorforuser(userName,sectorName);
+                    ArrayList<String> showSectors = DatabaseManager.getInstance().showSectors();
+                    if (!showSectors.contains(sectorName)){
+                        DatabaseManager.getInstance().removeSector(sectorName);
+                        File root = Environment.getExternalStorageDirectory();
+                        File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
+                        File file = new File(dir, sectorName+".png");
+                        if (file.exists())file.delete();
                     }
-                    if (deletedevice == true) {
-                        if (array!=null) {
-                            Iterator<Device> deviceIterator = array.iterator();
-                            while (deviceIterator.hasNext()) {
-                                // remove from the devicelist file
-                                Device device = deviceIterator.next();
-                                // remove from the SQL table
-                                byte[] data;
-                                data = new byte[]{(byte) 17, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
-                                DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                                device.getDeviceAddress(), (short) 0, data), device.getGatewayMacAddr(), device.getGatewayPassword(),
-                                        device.getGatewaySSID(), AdminPage.this));
-                                device.setCurrentParams(data);
-                                device.setChannelMark((short) 0);
-                                DatabaseManager.getInstance().updateDevice(device);
-                                deviceIterator.remove();
-                            }
-                        }
 
-                        Bitmap bitmap = dataupdate(sectorName+".png");
-                        if (bitmap!=null)
-                        {
-                            File root = Environment.getExternalStorageDirectory();
-                            File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
-                            File file = new File(dir, sectorName+".png");
-                            file.delete();
-                        }
-                    }else
-                    {
-                        if (array!=null) {
-                            array.clear();
-                        }
-                    }
                     ListView deviceList = (ListView) findViewById(R.id.devicelist);
                     deviceList.setAdapter(null);
-                    sectordetail.remove(sectorArray.get(info.position));
-                    sector.put(userName, sectordetail);
-                    DataManager.getInstance().setsector(sector);
-                    sectorArray.remove(info.position);
+                    sectornamelist.remove(info.position);
                     sectoradapter.notifyDataSetChanged();
-                    progressBar.setVisibility(View.INVISIBLE);
                     adddevice.setVisibility(View.INVISIBLE);
                     GetSummary();
+                    dialog.dismiss();
                 }
             });
             alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -447,21 +392,16 @@ public class AdminPage extends Activity {
             alertDialog.show();
         }else if (menuItemIndex == 0)
         {
-            BiMap<String, ArrayList> account = DataManager.getInstance().getaccount();
-            ArrayList<String> usernumber = new ArrayList<>();
-            if (account!=null) {
-                for (Map.Entry<String, ArrayList> map : account.entrySet()) {
-                    usernumber.add(map.getKey());
-                }
-            }
-            if (usernumber!=null && usernumber.size() > 1) {
+            ArrayList<String> allusernames = DatabaseManager.getInstance().getUserNameList();
+            allusernames.remove(userName);
+            if (!allusernames.isEmpty()) {
                 View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
                 Bitmap bitmap = getScreenShot(rootView);
                 DataManager.getInstance().setBitmap(bitmap);
                 Intent startNewActivityIntent = new Intent(AdminPage.this, AdminAddNew.class);
-                startNewActivityIntent.putExtra("Case", 4);
-                startNewActivityIntent.putExtra("UserName", userName);
-                startNewActivityIntent.putExtra("SectorName", sectorArray.get(info.position));
+                startNewActivityIntent.putExtra("Case", 3);
+                startNewActivityIntent.putExtra("userName", userName);
+                startNewActivityIntent.putExtra("sectorName", sectornamelist.get(info.position));
                 ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
                 activityadminStack.push("AdminAddNew", startNewActivityIntent);
             }else{
@@ -475,90 +415,28 @@ public class AdminPage extends Activity {
             alertDialog.setMessage("Do you want to delete the user?");
             alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    boolean deletedevice = true;
-                    //// delete the lights if this sector is the last one contains device information
-                    HashMap<String, ArrayList<Device>> sectorinformation = sector.get(userName);
-                    if (sectorinformation!=null) {
-                        for (Map.Entry<String, ArrayList<Device>> selfloop : sectorinformation.entrySet()) {
-                            String deleteselfsectorname = selfloop.getKey();
-                            Bitmap bitmap = dataupdate(deleteselfsectorname+".png");
-                            if (bitmap!=null)
-                            {
-                                File root = Environment.getExternalStorageDirectory();
-                                File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
-                                File file = new File(dir, deleteselfsectorname+".png");
-                                file.delete();
-                            }
-
-
-                            for (Map.Entry<String, HashMap> entry : sector.entrySet()) {
-                                String name = (String) entry.getKey();
-                                if (!name.equals(userName)) {
-                                    //check if any other user contains the sector
-                                    HashMap<String, ArrayList<Device>> sectorinfo = entry.getValue();
-                                    for (Map.Entry<String, ArrayList<Device>> entrys : sectorinfo.entrySet()) {
-                                        if (entrys.getKey().equals(deleteselfsectorname)) {
-                                            deletedevice = false;
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (deletedevice == true) {
-                                ArrayList<Device> array = (ArrayList<Device>) sector.get(userName).get(deleteselfsectorname);
-                                if (array != null) {
-                                    Iterator<Device> deviceIterator = array.iterator();
-                                    while (deviceIterator.hasNext()) {
-                                        Device device = deviceIterator.next();
-                                        byte[] data;
-                                        data = new byte[]{(byte) 17, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
-                                        DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                                        device.getDeviceAddress(), (short) 0, data), device.getGatewayMacAddr(), device.getGatewayPassword(),
-                                                device.getGatewaySSID(), AdminPage.this));
-                                        device.setChannelMark((short)0);
-                                        device.setCurrentParams(data);
-                                        DatabaseManager.getInstance().updateDevice(device);
-                                        deviceIterator.remove();
-                                    }
-
-                                }
-                            }
+                    ArrayList<String> sectors = DatabaseManager.getInstance().showSectorforuser(userName);
+                    if (userName!=null)DatabaseManager.getInstance().removeUserfromMapping(userName);
+                    ArrayList<String> showSectors = DatabaseManager.getInstance().showSectors();
+                    for(String sector:sectors) {
+                        if (!showSectors.contains(sector)){
+                            DatabaseManager.getInstance().removeSector(sector);
+                            File root = Environment.getExternalStorageDirectory();
+                            File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
+                            File file = new File(dir, sector+".png");
+                            if (file.exists())file.delete();
                         }
                     }
-
-                    for (Map.Entry<String, ArrayList> entry : nameset.entrySet()) {
-                        ArrayList<String>  account = entry.getValue();
-                        String passwords = entry.getKey();
-                        if (account.get(0).equals(userName))
-                        {
-                            nameset.remove(passwords);
-                            DataManager.getInstance().setaccount(nameset);
-                            break;
-                        }
-                    }
-
-                    ProgressBar progressBar = (ProgressBar)findViewById(R.id.progressBar);
-                    progresslayout.setClickable(true);
-                    progressBar.setVisibility(View.VISIBLE);
-                    Runnable r = new Runnable() {
-                        public void run() {
-                            RemoveEventsUser();
-                        }
-                    };
-
-                    new Thread(r).start();
-
-                    sector.remove(userName);
-                    DataManager.getInstance().setsector(sector);
-                    names.remove(userName);
+                    DatabaseManager.getInstance().removeEventforuser(userName);
+                    DatabaseManager.getInstance().removeUser(userName);
+                    usernamelist.remove(userName);
                     useradapter.notifyDataSetChanged();
-                    progressBar.setVisibility(View.INVISIBLE);
                     ListView deviceList = (ListView) findViewById(R.id.devicelist);
                     deviceList.setAdapter(null);
                     ListView sectorlist = (ListView) findViewById(R.id.sectorlist);
                     sectorlist.setAdapter(null);
                     GetSummary();
+                    dialog.dismiss();
                 }
             });
             alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -575,43 +453,10 @@ public class AdminPage extends Activity {
             alertDialog.setMessage("Do you want to delete the device?");
             alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    HashMap<String, HashMap<String, ArrayList<Device>>> sector = DataManager.getInstance().getsector();
-                    HashMap<String, ArrayList<Device>> sectioninformation = sector.get(userName);
-                    ArrayList<Device> devicelist = sectioninformation.get(sectorName);
-                    if (!sector.isEmpty()) {
-                        Iterator<Device> deviceIterator = devicelist.iterator();
-                        while (deviceIterator.hasNext()){
-                            Device device = deviceIterator.next();
-                            if (device.getDeviceName().equals(deviceName)) {
-                                byte[] data;
-                                data = new byte[]{(byte) 17, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
-                                DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                                device.getDeviceAddress(), (short) 0, data), device.getGatewayMacAddr(), device.getGatewayPassword(),
-                                        device.getGatewaySSID(), AdminPage.this));
-                                device.setCurrentParams(data);
-                                device.setChannelMark((short) 0);
-                                DatabaseManager.getInstance().updateDevice(device);
-                                deviceIterator.remove();
-                            }
-                        }
-
-                        for (Map.Entry<String, HashMap<String, ArrayList<Device>>> sectorinfo : sector.entrySet()) {
-                            HashMap<String, ArrayList<Device>> details = sectorinfo.getValue();
-                            for (Map.Entry<String, ArrayList<Device>> singlesectorinfo : details.entrySet())
-                            {
-                                if (singlesectorinfo.getKey().equals(sectorName))
-                                {
-                                    sectioninformation = sector.get(sectorinfo.getKey());
-                                    sectioninformation.put(sectorName, devicelist);
-                                    sector.put(sectorinfo.getKey(), sectioninformation);
-                                }
-                            }
-                        }
-                        DataManager.getInstance().setsector(sector);
-                        deviceAdptername.remove(info.position);
-                        deviceadapter.notifyDataSetChanged();
-                        GetSummary();
-                    }
+                    if (deviceName!=null && sectorName!=null) DatabaseManager.getInstance().updateDevicefromSector(deviceName,null);
+                    devicenamelist.remove(info.position);
+                    deviceadapter.notifyDataSetChanged();
+                    GetSummary();
                 }
             });
             alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -628,7 +473,7 @@ public class AdminPage extends Activity {
             Bitmap bitmap = getScreenShot(rootView);
             DataManager.getInstance().setBitmap(bitmap);
             Intent startNewActivityIntent = new Intent(AdminPage.this, AdminAddNew.class);
-            startNewActivityIntent.putExtra("Case", 6);
+            startNewActivityIntent.putExtra("Case", 4);
             startNewActivityIntent.putExtra("UserName",userName);
             ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
             activityadminStack.push("AdminAddNew", startNewActivityIntent);
@@ -637,84 +482,6 @@ public class AdminPage extends Activity {
         return true;
     }
 
-
-
-
-    public void RemoveEvents(String belongeduser, String deletethissector){
-        List<WeekViewEvent> events = DataManager.getInstance().getnewevents();
-        if (events.size() != 0) {
-            Iterator<WeekViewEvent> eventIterator = events.iterator();
-            while (eventIterator.hasNext()) {
-                WeekViewEvent event = eventIterator.next();
-                ArrayList<String> sectorsname = event.getdeviceList();
-                if (event.getName().equals(belongeduser)&&sectorsname.contains(deletethissector)){
-                    sectorsname.remove(deletethissector);
-                }
-                if (sectorsname.size()==0)eventIterator.remove();
-            }
-        }
-        DataManager.getInstance().setnewevents(events);
-        List<WeekViewEvent> futureevents = DataManager.getInstance().getevents();
-        if (events.size() != 0) {
-            Iterator<WeekViewEvent> eventIterator = futureevents.iterator();
-            while (eventIterator.hasNext()) {
-                WeekViewEvent event = eventIterator.next();
-                ArrayList<String> sectorsname = event.getdeviceList();
-                if (event.getName().equals(belongeduser) && sectorsname.contains(deletethissector)){
-                    sectorsname.remove(deletethissector);
-                }
-                if (sectorsname.size()==0)eventIterator.remove();
-            }
-        }
-        DataManager.getInstance().setevents(futureevents);
-
-
-    }
-
-    public void RemoveEventsUser() {
-        Gateway gateway = SysApplication.getInstance().getCurrGateway(AdminPage.this);
-        if (gateway!=null) {
-            List<WeekViewEvent> events = DataManager.getInstance().getnewevents();
-            if (events.size() != 0 && events!=null) {
-                Iterator<WeekViewEvent> eventIterator = events.iterator();
-                while (eventIterator.hasNext()) {
-                    WeekViewEvent event = eventIterator.next();
-                    if (event.getName().equals(userName))eventIterator.remove();
-                }
-            }
-            DataManager.getInstance().setnewevents(events);
-
-            List<WeekViewEvent> comingevents = DataManager.getInstance().getevents();
-            if (comingevents.size() != 0 & comingevents!=null) {
-                Iterator<WeekViewEvent> eventIterator = comingevents.iterator();
-                while (eventIterator.hasNext()) {
-                    WeekViewEvent event = eventIterator.next();
-                    if (event.getName().equals(userName))eventIterator.remove();
-                }
-            }
-            DataManager.getInstance().setevents(comingevents);
-        }
-    }
-    public static Bitmap dataupdate(String filename) {
-        File root = Environment.getExternalStorageDirectory();
-        File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
-        File file = new File(dir, filename);
-        if (file.exists()) {
-            try {
-                FileInputStream streamIn = new FileInputStream(file);
-                Bitmap bitmap = BitmapFactory.decodeStream(streamIn);
-                return bitmap;
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                return null;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        return null;
-    }
-*/
     public void GetSummary(){
 
         ArrayList<String> usernumberlist = DatabaseManager.getInstance().getUserNameList();
