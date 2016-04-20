@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +22,12 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.mylibrary.WeekViewEvent;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -36,10 +41,9 @@ public class HomePage extends Activity {
     boolean emergency = false;
     Switch switch1;
     ImageView emergencypic;
-    AlertDialog.Builder builder = null;
-    AlertDialog alertDialog;
     Handler myHandler;
     Runnable myRunnable;
+    TCPConnection tcpConnection = new TCPConnection();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -81,250 +85,103 @@ public class HomePage extends Activity {
 
         gridView.setAdapter(adapter);
 
+        //Initialize the TCP connection
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        tcpConnection.execute("");
 
         Calendar today = Calendar.getInstance();
-        Calendar newtoday = Calendar.getInstance();
-        newtoday.set(Calendar.SECOND, 0);
-        newtoday.set(Calendar.MINUTE, 0);
-        newtoday.set(Calendar.HOUR_OF_DAY, 0);
-        newtoday.add(Calendar.DATE, 1);
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                GetNewEvent();
-            }
-        }, newtoday.getTime(), 1000 * 60 * 60 * 12);
 
-/*
         final Timer maintimer = new Timer();
         maintimer.scheduleAtFixedRate(new TimerTask() {
 
             @Override
             public void run() {
-                if (gateway != null) {
-                    if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
                     if (emergency == false) {
-                        System.out.println("*********** main thread");
                         MakeAlert();
                     } else {
-                        ArrayList<Device> deviceArrayList = DatabaseManager.getInstance().getDeviceList().getmDeviceList();
-                        for (Device device : deviceArrayList) {
-                            byte[] data;
-                            data = new byte[]{(byte) 17, (byte) 100, (byte) 0, (byte) 0, (byte) 0};
-                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                            device.getDeviceAddress(), (short) 0, data), device.getGatewayMacAddr(), device.getGatewayPassword(),
-                                    device.getGatewaySSID(), HomePage.this));
+                        ArrayList<String> devicelist = DatabaseManager.getInstance().getDeviceList();
+                        for (String devicename : devicelist) {
+                            // emergency is on: intensity = 100, control = 0
+                            int modulenumber = DatabaseManager.getInstance().getDeviceNude(devicename);
+                            tcpConnection.doInBackground("AT+TXA="+modulenumber+"<100>");
                         }
                     }
-                } else {
-                    //maintimer.cancel();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (alertDialog != null && alertDialog.isShowing()) {
-                            } else {
-                                builder = new AlertDialog.Builder(HomePage.this);
-                                builder.setTitle("Error");
-                                builder.setMessage("Gateway Error, please connect the wifi and press OK");
-                                builder.setCancelable(false);
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent i = getBaseContext().getPackageManager()
-                                                .getLaunchIntentForPackage(getBaseContext().getPackageName());
-                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        int mPendingIntentId = 3;
-                                        PendingIntent mPendingIntent = PendingIntent.getActivity(getApplicationContext(), mPendingIntentId, i, PendingIntent.FLAG_CANCEL_CURRENT);
-                                        AlarmManager mgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-                                        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, mPendingIntent);
-                                        System.exit(0);
-                                    }
-                                });
-                                alertDialog = builder.create();
-                                alertDialog.show();
-                            }
-                        }
-                    });
-                }
             }
         }, today.getTime(), 1000 * 20);
-*/
+
 
         switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                /*
+
                 if (switch1.isChecked() == true) {
                     emergency = true;
                     emergencypic.setVisibility(View.VISIBLE);
-                    ArrayList<Device> deviceArrayList = DatabaseManager.getInstance().getDeviceList().getmDeviceList();
+                    ArrayList<String> devicelist = DatabaseManager.getInstance().getDeviceList();
                     switch1.setText("Emergency ON  ");
                     gridView.setAdapter(null);
-                    Gateway gateway = SysApplication.getInstance().getCurrGateway(HomePage.this);
-                    if (gateway != null) {
                         myHandler.removeCallbacks(myRunnable);
-                        for (Device device : deviceArrayList) {
-                            byte[] data;
-                            data = new byte[]{(byte) 17, (byte) 100, (byte) 0, (byte) 0, (byte) 0};
-                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                            device.getDeviceAddress(), (short) 0, data), device.getGatewayMacAddr(), device.getGatewayPassword(),
-                                    device.getGatewaySSID(), HomePage.this));
+                        // emergency is on: intensity = 100, control = 0
+                        for (String devicename : devicelist) {
+                            int modulenumber = DatabaseManager.getInstance().getDeviceNude(devicename);
+                            tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<100>");
                         }
-                    } else {
-                        myHandler.postDelayed(myRunnable, 60 * 3 * 1000);
-                        if (alertDialog != null && alertDialog.isShowing()) {
-                        } else {
-                            builder = new AlertDialog.Builder(HomePage.this);
-                            builder.setTitle("Error");
-                            builder.setMessage("Gateway Error, please connect the wifi and press OK");
-                            builder.setCancelable(false);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Intent i = getBaseContext().getPackageManager()
-                                            .getLaunchIntentForPackage(getBaseContext().getPackageName());
-                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    int mPendingIntentId = 3;
-                                    PendingIntent mPendingIntent = PendingIntent.getActivity(getApplicationContext(), mPendingIntentId, i, PendingIntent.FLAG_CANCEL_CURRENT);
-                                    AlarmManager mgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-                                    mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, mPendingIntent);
-                                    System.exit(0);
-                                }
-                            });
-                            alertDialog = builder.create();
-                            alertDialog.show();
-                        }
-                    }
                 } else {
                     emergency = false;
                     gridView.setAdapter(adapter);
                     switch1.setText("Emergency OFF  ");
                     emergencypic.setVisibility(View.GONE);
                 }
-                */
             }
 
         });
     }
 
     public void MakeAlert() {
-        /*
-        List<WeekViewEvent> events;
         Calendar cal = Calendar.getInstance();
-        events = DataManager.getInstance().getnewevents();
-        HashMap<String, HashMap<String, ArrayList<Device>>> sector = DataManager.getInstance().getsector();
-        ArrayList<Device> arrayList = DatabaseManager.getInstance().LoadDeviceList("devicelist");
-        if (events != null && events.size()> 0) {
-            Iterator<WeekViewEvent> eventIterator = events.iterator();
-            while (eventIterator.hasNext()) {
-                WeekViewEvent event = eventIterator.next();
-                ArrayList<String> sectorsname = event.getdeviceList();
-                Calendar start = event.getStartTime();
-                Calendar finish = event.getEndTime();
-                String username = event.getName();
-                int intensity = event.getIntensity();
-
-                if (cal.before(finish) && cal.after(start)) {
-                    Iterator<String> stringIterator = sectorsname.iterator();
-                    while (stringIterator.hasNext()) {
-                        String sectorname = stringIterator.next();
-                        if (sector.get(username).containsKey(sectorname)) {
-                            ArrayList<Device> deviceArrayList = sector.get(username).get(sectorname);
-                            if (deviceArrayList != null) {
-                                for (Device device : deviceArrayList) {
-                                    Iterator<Device> deviceiterator = arrayList.iterator();
-                                    while (deviceiterator.hasNext()) {
-                                        Device device1 = deviceiterator.next();
-                                        if (device1.getDeviceName().equals(device.getDeviceName())) {
-                                            deviceiterator.remove();
-                                        }
-                                    }
-                                    Device thedevice = DatabaseManager.getInstance().getDeviceInforName(device.getDeviceName());
-                                    if (thedevice != null) {
-                                        if (thedevice.getChannelMark() != 5)
-                                        // if controled by control page then dont use schedule
-                                        {
-                                            byte[] data;
-                                            data = new byte[]{(byte) 17, (byte) intensity, (byte) 0, (byte) 0, (byte) 0};
-                                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                                            thedevice.getDeviceAddress(), (short) 0, data), thedevice.getGatewayMacAddr(), thedevice.getGatewayPassword(),
-                                                    thedevice.getGatewaySSID(), HomePage.this));
-                                            thedevice.setCurrentParams(data);
-                                            DatabaseManager.getInstance().updateDevice(thedevice);
-                                        }else
-                                        {
-                                            byte[] data;
-                                            data = thedevice.getCurrentParams();
-                                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                                            thedevice.getDeviceAddress(), (short) 0, data), thedevice.getGatewayMacAddr(), thedevice.getGatewayPassword(),
-                                                    thedevice.getGatewaySSID(), HomePage.this));
-                                        }
-                                    }
-                                }
-                            } else {
+        ArrayList<WeekViewEvent> events = DatabaseManager.getInstance().loadEvent();
+        ArrayList<String> devicelist = DatabaseManager.getInstance().getDeviceList();
+        if (events.size()> 0) {
+            for (WeekViewEvent event: events) {
+                Calendar eventstart = DatabaseManager.getInstance().getEventStart(event);
+                Calendar eventfinish = DatabaseManager.getInstance().getEventFinish(event);
+                if (cal.before(eventfinish) && cal.after(eventstart)) {
+                    String sectorlist = DatabaseManager.getInstance().getEventSector(event);
+                    for (String sub: sectorlist.split(","))
+                    {
+                        ArrayList<String> devicefromsector = DatabaseManager.getInstance().showDeviceforsector(sub);
+                        for (String dev: devicefromsector)
+                        {
+                            if (devicelist.contains(dev))devicelist.remove(dev);
+                            int control = DatabaseManager.getInstance().getDeviceControl(dev);
+                            int nude = DatabaseManager.getInstance().getDeviceNude(dev);
+                            if (control==1) {
+                                int intensity = DatabaseManager.getInstance().getDeviceIntensity(dev);
+                                tcpConnection.doInBackground("AT+TXA=" + nude + "<" +intensity + ">");
+                            }else
+                            {
+                                int intensity = DatabaseManager.getInstance().getEventIntensity(event);
+                                tcpConnection.doInBackground("AT+TXA=" + nude + "<" +intensity + ">");
                             }
-                        } else {
-                            stringIterator.remove();
                         }
                     }
                 }
             }
-
-            if (arrayList != null) {
-                Iterator<Device> deviceiterator = arrayList.iterator();
-                while (deviceiterator.hasNext()) {
-                    Device device = deviceiterator.next();
-                    Device thedevice = DatabaseManager.getInstance().getDeviceInforName(device.getDeviceName());
-                    if (thedevice != null) {
-                        if (thedevice.getChannelMark() != 5) {
-                            byte[] data;
-                            data = new byte[]{(byte) 17, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
-                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                            thedevice.getDeviceAddress(), (short) 0, data), thedevice.getGatewayMacAddr(), thedevice.getGatewayPassword(),
-                                    thedevice.getGatewaySSID(), HomePage.this));
-                            thedevice.setCurrentParams(data);
-                            DatabaseManager.getInstance().updateDevice(thedevice);
-                        } else {
-                            byte[] data = thedevice.getCurrentParams();
-                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                            thedevice.getDeviceAddress(), (short) 0, data), thedevice.getGatewayMacAddr(), thedevice.getGatewayPassword(),
-                                    thedevice.getGatewaySSID(), HomePage.this));
-                        }
-                    }
-                }
+            for (String device : devicelist)
+            {
+                int modulenumber = DatabaseManager.getInstance().getDeviceNude(device);
+                tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<0>");
             }
-        }else{
-            Iterator<Device> deviceiterator = arrayList.iterator();
-            if (deviceiterator != null) {
-                while (deviceiterator.hasNext()) {
-                    Device device = deviceiterator.next();
-                    Device thedevice = DatabaseManager.getInstance().getDeviceInforName(device.getDeviceName());
-                    if (thedevice != null) {
-                        if (thedevice.getChannelMark() != 5) {
-                            byte[] data;
-                            data = new byte[]{(byte) 17, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
-                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                            thedevice.getDeviceAddress(), (short) 0, data), thedevice.getGatewayMacAddr(), thedevice.getGatewayPassword(),
-                                    thedevice.getGatewaySSID(), HomePage.this));
-                            thedevice.setCurrentParams(data);
-                            DatabaseManager.getInstance().updateDevice(thedevice);
-                        } else {
-                            byte[] data = thedevice.getCurrentParams();
-                            DeviceSocket.getInstance().send(Message.createMessage((byte) 4, DevicePacket.createPacket((byte) 4,
-                                            thedevice.getDeviceAddress(), (short) 0, data), thedevice.getGatewayMacAddr(), thedevice.getGatewayPassword(),
-                                    thedevice.getGatewaySSID(), HomePage.this));
-                        }
-                    }
-                }
+        }else
+        {
+            for (String device : devicelist)
+            {
+                int modulenumber = DatabaseManager.getInstance().getDeviceNude(device);
+                tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<0>");
             }
         }
-        */
+
     }
 
     public void clickHandler(View v) {
@@ -407,42 +264,6 @@ public class HomePage extends Activity {
         radioButton4.setBackground(getResources().getDrawable(R.drawable.circledots));
     }
 
-    public void GetNewEvent() {
-        /*
-        List<WeekViewEvent> events = DataManager.getInstance().getevents();
-        List<WeekViewEvent> newevents = DataManager.getInstance().getnewevents();
-        long today = Calendar.getInstance().getTimeInMillis();
-        if (events != null) {
-            Iterator<WeekViewEvent> eventIterator = events.iterator();
-            while (eventIterator.hasNext()) {
-                WeekViewEvent event = eventIterator.next();
-                long eventday = event.getStartTime().getTimeInMillis();
-                long mills = eventday - today;
-                long days = mills / (1000 * 60 * 60 * 24);
-                if (days <= 30) {
-                    newevents.add(event);
-                    eventIterator.remove();
-                }
-            }
-        }
-        if (newevents!=null)
-        {
-            Iterator<WeekViewEvent> neweventIterator = newevents.iterator();
-            while (neweventIterator.hasNext()) {
-                WeekViewEvent event = neweventIterator.next();
-                long eventday = event.getStartTime().getTimeInMillis();
-                long mills = today - eventday;
-                long days = mills / (1000 * 60 * 60 * 24);
-                if (days >= 30) {
-                    neweventIterator.remove();
-                }
-            }
-        }
-        DataManager.getInstance().setnewevents(newevents);
-        DataManager.getInstance().setevents(events);
-        */
-    }
-
     @Override
     public void onUserInteraction()
     {
@@ -494,6 +315,45 @@ public class HomePage extends Activity {
             return rowView;
         }
     }
+
+    public class TCPConnection extends AsyncTask<String, String, String> {
+        TCPClient mTcpClient;
+        @Override
+        protected String doInBackground(String... sendmessage) {
+            //we create a TCPClient object and
+
+            if (mTcpClient!=null && mTcpClient.isConnected())
+            {
+                mTcpClient.sendMessage(sendmessage[0]);
+            }else {
+                mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
+                    @Override
+                    //here the messageReceived method is implemented
+                    public void messageReceived(String message) {
+                        //this method calls the onProgressUpdate
+                        RetrieveMessage(message);
+                    }
+                });
+                mTcpClient.run();
+            }
+            return null;
+        }
+
+    }
+
+    public void RetrieveMessage(String message)
+    {
+        System.out.println("***********" + message);
+        if (message.length()<=12 && message.length()>=10 && message.contains(",")) {
+            String[] sub = message.split(",", 2);
+            if (sub[0].substring(1, 5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 100 && Integer.parseInt(sub[1]) <= 100) {
+                Integer nude = Integer.parseInt(sub[0].substring(6, 8));
+                Integer intensity = Integer.parseInt(sub[1]);
+                DatabaseManager.getInstance().updateDeviceFeedBack(nude, intensity);
+            }
+        }
+    }
+
 }
 
 

@@ -69,7 +69,7 @@ public class GlobalCalendar extends Activity{
         mMonthChangeListener = new MonthLoader.MonthChangeListener() {
             @Override
             public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
-                List<WeekViewEvent> events = DatabaseManager.getInstance().loadEvent();
+                ArrayList<WeekViewEvent> events = DatabaseManager.getInstance().loadEvent();
                 return events;
             }
 

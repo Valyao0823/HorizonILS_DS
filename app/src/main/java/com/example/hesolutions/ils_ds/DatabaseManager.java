@@ -195,7 +195,7 @@ public class DatabaseManager {
     {
         Object[] objArr = null;
         if (this.mDataBase != null) {
-            objArr = new Object[9];
+            objArr = new Object[10];
             objArr[0] = String.valueOf(devicename);
             objArr[1] = Integer.valueOf(nude);
             objArr[2] = Integer.valueOf((short)0); // defalut value of intensity
@@ -205,7 +205,8 @@ public class DatabaseManager {
             objArr[6] = String.valueOf(location);
             objArr[7] = String.valueOf(devicetype);
             objArr[8] = String.valueOf(devicedetail);
-            this.mDataBase.execSQL("INSERT INTO DeviceTable VALUES(?,?,?,?,?,?,?,?,?)", objArr);
+            objArr[9] = Integer.valueOf((short)0); // defalut value of feedback
+            this.mDataBase.execSQL("INSERT INTO DeviceTable VALUES(?,?,?,?,?,?,?,?,?,?)", objArr);
         }
         return $assertionsDisabled;
     }
@@ -255,6 +256,19 @@ public class DatabaseManager {
         return  intensity;
     }
 
+    public Integer getDeviceFeedBack(String devicename)
+    {
+        int feedback = 0;
+        Cursor cursor = this.mDataBase.rawQuery("SELECT FeedBack FROM DeviceTable WHERE DeviceName = ?", new String[]{String.valueOf(devicename)});
+        if (cursor == null) {
+            return null;
+        }
+        cursor.moveToFirst();
+        feedback = cursor.getInt(0);
+        cursor.close();
+        return  feedback;
+    }
+
     public Integer getDeviceControl(String devicename)
     {
         int control = 0;
@@ -268,11 +282,49 @@ public class DatabaseManager {
         return  control;
     }
 
+    public Integer getDeviceNude(String devicename)
+    {
+        int nude = 0;
+        Cursor cursor = this.mDataBase.rawQuery("SELECT DeviceNude FROM DeviceTable WHERE DeviceName = ?", new String[]{String.valueOf(devicename)});
+        if (cursor == null) {
+            return null;
+        }
+        cursor.moveToFirst();
+        nude = cursor.getInt(0);
+        cursor.close();
+        return  nude;
+    }
+
     public boolean updateDevicefromSector(String devicename, String sectorname)
     {
         try {
             if (this.mDataBase != null) {
                 this.mDataBase.execSQL("UPDATE DeviceTable SET SectorName = ? WHERE DeviceName = ?", new String[]{String.valueOf(sectorname),String.valueOf(devicename)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
+
+    public boolean updateDeviceIntensity(String devicename, int intensity, int control)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("UPDATE DeviceTable SET Intensity = ?, Control = ? WHERE DeviceName = ?", new Object[]{Integer.valueOf(intensity),Integer.valueOf(control),String.valueOf(devicename)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
+
+
+    public boolean updateDeviceFeedBack(int nude, int intensity)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("UPDATE DeviceTable SET Intensity = ? WHERE DeviceNude = ?", new Object[]{Integer.valueOf(intensity),Integer.valueOf(nude)});
                 return true;
             }
         } catch (Exception e) {
@@ -424,6 +476,48 @@ public class DatabaseManager {
         } catch (Exception e) {
         }
         return $assertionsDisabled;
+    }
+
+    public Calendar getEventStart(WeekViewEvent event)
+    {
+        Calendar startTime = Calendar.getInstance();
+        Cursor cursor = this.mDataBase.rawQuery("SELECT StartTime FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
+        cursor.moveToFirst();
+        Date st = new Date(cursor.getLong(1));
+        startTime.setTime(st);
+        cursor.close();
+        return startTime;
+    }
+
+    public Calendar getEventFinish(WeekViewEvent event)
+    {
+        Calendar finishTime = Calendar.getInstance();
+        Cursor cursor = this.mDataBase.rawQuery("SELECT FinishTime FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
+        cursor.moveToFirst();
+        Date ft = new Date(cursor.getLong(2));
+        finishTime.setTime(ft);
+        cursor.close();
+        return finishTime;
+    }
+
+    public String getEventSector(WeekViewEvent event)
+    {
+        String sectorlist;
+        Cursor cursor = this.mDataBase.rawQuery("SELECT SectorList FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
+        cursor.moveToFirst();
+        sectorlist = cursor.getString(3);
+        cursor.close();
+        return sectorlist;
+    }
+
+    public Integer getEventIntensity(WeekViewEvent event)
+    {
+        Integer intensity;
+        Cursor cursor = this.mDataBase.rawQuery("SELECT SectorList FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
+        cursor.moveToFirst();
+        intensity = cursor.getInt(6);
+        cursor.close();
+        return intensity;
     }
 }
 

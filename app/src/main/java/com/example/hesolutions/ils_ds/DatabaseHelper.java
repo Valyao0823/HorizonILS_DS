@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 7;
@@ -30,18 +31,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         this.context = context;
         this.mDataBaseName = dataBaseName;
         this.mSrcDataBaseName = srcDataBaseName;
-        /*
+
         File root = Environment.getExternalStorageDirectory();
         File dir = new File(root.getAbsolutePath() + "/horizon_ds");
         File file = new File(dir, this.mSrcDataBaseName);
         this.mFile = file;
-        */
-        this.mFile = context.getDatabasePath(this.mDataBaseName);
-        System.out.println(mFile.toString() + "********** ");
+
+        //this.mFile = context.getDatabasePath(this.mDataBaseName);
+        /*
         if (!this.mFile.exists()) {
             this.createDatabase = true;
         }
-
+        */
     }
 
     public synchronized SQLiteDatabase getWritableDatabase() {
@@ -54,23 +55,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 database = copyDatabase();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        } else {
-            File file = this.context.getFileStreamPath("temp.txt");
-            if (file.exists()) {
-                try {
-                    InputStream input = new FileInputStream(file);
-                    OutputStream output = new FileOutputStream(this.mFile);
-                    copy(input, output);
-                    input.close();
-                    output.close();
-                    file.delete();
-                    writableDatabase = super.getWritableDatabase();
-                } catch (FileNotFoundException e2) {
-                    e2.printStackTrace();
-                } catch (IOException e3) {
-                    e3.printStackTrace();
-                }
             }
         }
         writableDatabase = database;
@@ -105,6 +89,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             count += n;
         }
     }
-
-
 }

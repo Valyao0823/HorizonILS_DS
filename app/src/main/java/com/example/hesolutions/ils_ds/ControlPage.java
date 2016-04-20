@@ -139,7 +139,7 @@ public class ControlPage extends Activity {
             final EnhancedSwitch switchid = (EnhancedSwitch)convertView.findViewById(R.id.switchid);
             tv.setText(devicename);
 
-            if (DatabaseManager.getInstance().getDeviceIntensity(devicename)!=0)
+            if (DatabaseManager.getInstance().getDeviceFeedBack(devicename)!=0)
             {
                 switchid.setCheckedProgrammatically(true);
             } else
@@ -159,7 +159,7 @@ public class ControlPage extends Activity {
             tv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    intensity = DatabaseManager.getInstance().getDeviceIntensity(devicename);
+                    intensity = DatabaseManager.getInstance().getDeviceFeedBack(devicename);
                     seekBar.setVisibility(View.VISIBLE);
                     Intensitynum.setVisibility(View.VISIBLE);
                     Intensity.setVisibility(View.VISIBLE);
@@ -211,7 +211,7 @@ public class ControlPage extends Activity {
                         SetParams[3] = (byte) 0;
                         SetParams[4] = (byte) 0;
                     }
-
+                    final String device = devicenameT.getText().toString();
                     if (progressfinal == 0) {
                         if (controlalertdialog != null && controlalertdialog.isShowing()) {
                         } else {
@@ -222,16 +222,14 @@ public class ControlPage extends Activity {
                             controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     // contorl = 0 , intensity = 0
-
-                                    adapter.notifyDataSetChanged();
+                                    DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 0);
                                 }
                             });
                             controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     // control = 1, intensity = 0
-
-                                    adapter.notifyDataSetChanged();
+                                    DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 1);
                                 }
                             });
                             controlalertdialog = controlbuilder.create();
@@ -239,8 +237,7 @@ public class ControlPage extends Activity {
                         }
                     } else {
                         // control = 1, intensity = progress value
-
-                        adapter.notifyDataSetChanged();
+                        DatabaseManager.getInstance().updateDeviceIntensity(device, progressfinal, 1);
                     }
 
                 }
@@ -259,8 +256,7 @@ public class ControlPage extends Activity {
                     IntensitySector.setVisibility(View.INVISIBLE);
                     if (switchid.isChecked() == true) {
                         // control = 1 , intensity = 100;
-
-                        adapter.notifyDataSetChanged();
+                        DatabaseManager.getInstance().updateDeviceIntensity(devicename, 100, 1);
                     } else {
                         if (controlalertdialog != null && controlalertdialog.isShowing()) {
                         } else {
@@ -271,14 +267,14 @@ public class ControlPage extends Activity {
                             controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     // control = 0, intensity = 0
-                                    adapter.notifyDataSetChanged();
+                                    DatabaseManager.getInstance().updateDeviceIntensity(devicename, 0, 0);
                                 }
                             });
                             controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     // control = 1, intensity = 0;
-                                    adapter.notifyDataSetChanged();
+                                    DatabaseManager.getInstance().updateDeviceIntensity(devicename, 0, 1);
                                 }
                             });
                             controlalertdialog = controlbuilder.create();
@@ -329,10 +325,10 @@ public class ControlPage extends Activity {
             final ArrayList<String> devicelist = DatabaseManager.getInstance().showDeviceforsector(sectorname);
             if (devicelist!=null && !devicelist.isEmpty()) {
                 for (String devicename:devicelist) {
-                    if (DatabaseManager.getInstance().getDeviceIntensity(devicename)!=0)
+                    if (DatabaseManager.getInstance().getDeviceFeedBack(devicename)!=0)
                     {
                         switchid.setCheckedProgrammatically(true);
-                        sectorintensity = DatabaseManager.getInstance().getDeviceIntensity(devicename);
+                        sectorintensity = DatabaseManager.getInstance().getDeviceFeedBack(devicename);
                         break;
                     } else {
                         switchid.setCheckedProgrammatically(false);
@@ -411,7 +407,6 @@ public class ControlPage extends Activity {
                         SetParams[3] = (byte) 0;
                         SetParams[4] = (byte) 0;
                     }
-
                     if (progressfinal == 0) {
                         if (controlalertdialog != null && controlalertdialog.isShowing()) {
                         } else {
@@ -422,14 +417,18 @@ public class ControlPage extends Activity {
                             controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     // Control = 0, intensity = 0;
-
+                                    for (String device : devicelist) {
+                                        DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 0);
+                                    }
                                 }
                             });
                             controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     // Control = 1, intensity =0
-
+                                    for (String device : devicelist) {
+                                        DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 1);
+                                    }
                                 }
                             });
                             controlalertdialog = controlbuilder.create();
@@ -437,7 +436,9 @@ public class ControlPage extends Activity {
                         }
                     } else {
                         // Control = 1, intensity = progress value
-
+                        for (String device : devicelist) {
+                            DatabaseManager.getInstance().updateDeviceIntensity(device, progressfinal, 1);
+                        }
                     }
                 }
             });
@@ -455,7 +456,9 @@ public class ControlPage extends Activity {
                         if (devicelist != null && !devicelist.isEmpty()) {
                             if (switchid.isChecked() == true) {
                                 // control = 1, intensity = 100;
-
+                                for (String device : devicelist) {
+                                    DatabaseManager.getInstance().updateDeviceIntensity(device, 100, 1);
+                                }
                             } else {
                                 if (controlalertdialog != null && controlalertdialog.isShowing()) {
                                 } else {
@@ -466,12 +469,18 @@ public class ControlPage extends Activity {
                                     controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
                                             // control = 0, intensity = 0;
+                                            for (String device : devicelist) {
+                                                DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 0);
+                                            }
                                         }
                                     });
                                     controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             // control = 1, intensity = 0;
+                                            for (String device : devicelist) {
+                                                DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 1);
+                                            }
 
                                         }
                                     });
@@ -504,7 +513,7 @@ public class ControlPage extends Activity {
     }
     public static Bitmap dataupdate(String filename) {
         File root = Environment.getExternalStorageDirectory();
-        File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
+        File dir = new File(root.getAbsolutePath() + "/horizon_ds/bitmap");
         File file = new File(dir, filename);
         if (file.exists()) {
             try {

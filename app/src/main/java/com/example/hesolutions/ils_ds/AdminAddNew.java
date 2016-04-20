@@ -207,7 +207,6 @@ public class AdminAddNew extends Activity {
 
         // case 1 and case 4
         SAVE.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(final View v) {
                 if (usecase == 4)

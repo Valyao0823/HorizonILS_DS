@@ -370,7 +370,7 @@ public class AdminPage extends Activity {
                     if (!showSectors.contains(sectorName)){
                         DatabaseManager.getInstance().removeSector(sectorName);
                         File root = Environment.getExternalStorageDirectory();
-                        File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
+                        File dir = new File(root.getAbsolutePath() + "/horizon_ds/bitmap");
                         File file = new File(dir, sectorName+".png");
                         if (file.exists())file.delete();
                     }

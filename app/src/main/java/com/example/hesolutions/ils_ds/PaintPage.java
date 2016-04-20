@@ -317,7 +317,7 @@ public class PaintPage extends Activity{
         if (Environment.MEDIA_MOUNTED.equals(state)) {
 
             File root = Environment.getExternalStorageDirectory();
-            File dir = new File(root.getAbsolutePath() + "/Horizon/Bitmap");
+            File dir = new File(root.getAbsolutePath() + "/horizon_ds/bitmap");
             if (!dir.exists()) {
                 dir.mkdir();
             }
