@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -33,10 +35,9 @@ import java.util.TimerTask;
 
 
 public class HomePage extends Activity {
-    final SimpleDateFormat sdf = new SimpleDateFormat("MMM dd yyyy HH mm");
-    TextView CODE1, CODE2, CODE3, CODE4;
+    TextView CODE1, CODE2, CODE3, CODE4, recorddata;
     GridView gridView;
-    Button radioButton1, radioButton2, radioButton3, radioButton4;
+    Button radioButton1, radioButton2, radioButton3, radioButton4, record;
     boolean jump = false;
     boolean emergency = false;
     Switch switch1;
@@ -60,6 +61,8 @@ public class HomePage extends Activity {
         radioButton2 = (Button) findViewById(R.id.radioButton2);
         radioButton3 = (Button) findViewById(R.id.radioButton3);
         radioButton4 = (Button) findViewById(R.id.radioButton4);
+        recorddata = (TextView)findViewById(R.id.recorddata);
+        record = (Button) findViewById(R.id.record);
         switch1 = (Switch) findViewById(R.id.switch1);
         emergencypic = (ImageView) findViewById(R.id.emergencypic);
 
@@ -121,12 +124,12 @@ public class HomePage extends Activity {
                     ArrayList<String> devicelist = DatabaseManager.getInstance().getDeviceList();
                     switch1.setText("Emergency ON  ");
                     gridView.setAdapter(null);
-                        myHandler.removeCallbacks(myRunnable);
-                        // emergency is on: intensity = 100, control = 0
-                        for (String devicename : devicelist) {
-                            int modulenumber = DatabaseManager.getInstance().getDeviceNude(devicename);
-                            tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<100>");
-                        }
+                    myHandler.removeCallbacks(myRunnable);
+                    // emergency is on: intensity = 100, control = 0
+                    for (String devicename : devicelist) {
+                        int modulenumber = DatabaseManager.getInstance().getDeviceNude(devicename);
+                        tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<100>");
+                    }
                 } else {
                     emergency = false;
                     gridView.setAdapter(adapter);
@@ -135,6 +138,21 @@ public class HomePage extends Activity {
                 }
             }
 
+        });
+
+        record.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (recorddata.getVisibility() == View.VISIBLE)
+                {
+                    recorddata.setVisibility(View.INVISIBLE);
+                }else {
+                    ArrayList<String> data = DatabaseManager.getInstance().showRecord();
+                    recorddata.setVisibility(View.VISIBLE);
+                    recorddata.setText(data.toString());
+                    recorddata.setMovementMethod(new ScrollingMovementMethod());
+                }
+            }
         });
     }
 

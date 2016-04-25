@@ -352,6 +352,7 @@ public class AdminPage extends Activity {
             deviceName = devicenamelist.get(info.position);
             menu.setHeaderTitle(deviceName);
             menu.add(0, 3, 0, "Delete");
+            menu.add(0, 5, 0, "Change Name");
         }
     }
     @Override
@@ -475,6 +476,18 @@ public class AdminPage extends Activity {
             Intent startNewActivityIntent = new Intent(AdminPage.this, AdminAddNew.class);
             startNewActivityIntent.putExtra("Case", 4);
             startNewActivityIntent.putExtra("UserName",userName);
+            ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
+            activityadminStack.push("AdminAddNew", startNewActivityIntent);
+        }else if (menuItemIndex == 5)
+        {
+            View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+            Bitmap bitmap = getScreenShot(rootView);
+            DataManager.getInstance().setBitmap(bitmap);
+            Intent startNewActivityIntent = new Intent(AdminPage.this, AdminAddNew.class);
+            startNewActivityIntent.putExtra("Case", 7);
+            startNewActivityIntent.putExtra("userName",userName);
+            startNewActivityIntent.putExtra("sectorName",sectorName);
+            startNewActivityIntent.putExtra("deviceName",deviceName);
             ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
             activityadminStack.push("AdminAddNew", startNewActivityIntent);
         }

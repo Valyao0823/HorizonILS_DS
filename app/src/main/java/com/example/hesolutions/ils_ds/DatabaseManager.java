@@ -10,6 +10,7 @@ import com.mylibrary.WeekViewEvent;
 
 import java.io.File;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -331,6 +332,18 @@ public class DatabaseManager {
         }
         return $assertionsDisabled;
     }
+
+    public boolean changeDeviceName(String olddevicename, String newdevicename)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("UPDATE DeviceTable SET DeviceName = ? WHERE DeviceName = ?", new Object[]{String.valueOf(newdevicename),String.valueOf(olddevicename)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
     //============================================Mapping===========================================
 
     public boolean assignSector(String username, String sectorname)
@@ -518,6 +531,36 @@ public class DatabaseManager {
         intensity = cursor.getInt(6);
         cursor.close();
         return intensity;
+    }
+
+    //=============================================Record =======================================================
+    public boolean addRecord(long time, String action)
+    {
+        Object[] objArr = null;
+        if (this.mDataBase != null) {
+            objArr = new Object[2];
+            objArr[0] = Long.valueOf(time);
+            objArr[1] = String.valueOf(action);
+            this.mDataBase.execSQL("INSERT INTO RecordTable VALUES(?,?)", objArr);
+        }
+        return $assertionsDisabled;
+    }
+
+    public ArrayList showRecord()
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        ArrayList<String> recordlist = new ArrayList<>();
+        String record = "";
+        Cursor cursor = this.mDataBase.rawQuery("SELECT * FROM RecordTable", null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Date displaytime = new Date(cursor.getLong(0));
+            record =  sdf.format(displaytime) + ": " +cursor.getString(1) + "\n";
+            recordlist.add(record);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return recordlist;
     }
 }
 

@@ -40,6 +40,7 @@ public class AdminAddNew extends Activity {
     RelativeLayout addNewUser, addnewsector, addnewdevice, assignuser, assigndevice;
     String userName = "";
     String sectorName = "";
+    String deviceName = "";
     String result = "";
     String[] deviceinformation;
     ListView sharesector, sharedevice;
@@ -193,7 +194,18 @@ public class AdminAddNew extends Activity {
             addNewUser.setVisibility(View.GONE);
             addnewsector.setVisibility(View.GONE);
             addnewdevice.setVisibility(View.GONE);
+        }else if (usecase == 7)
+        {
+            assigndevice.setVisibility(View.GONE);
+            assignuser.setVisibility(View.GONE);
+            userName = getIntent().getStringExtra("userName");
+            sectorName = getIntent().getStringExtra("sectorName");
+            deviceName = getIntent().getStringExtra("deviceName");
+            addNewUser.setVisibility(View.GONE);
+            addnewsector.setVisibility(View.GONE);
+            addnewdevice.setVisibility(View.VISIBLE);
         }
+
 
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,7 +226,7 @@ public class AdminAddNew extends Activity {
                     String password = DatabaseManager.getInstance().getPassword(userName);
                     final String Passwords = CODE.getText().toString();
                     if (Passwords.equals(password)) {
-                        Toast.makeText(AdminAddNew.this, "The new password is the same with the old password.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AdminAddNew.this, "The new password is the same as the old password.", Toast.LENGTH_SHORT).show();
                     }else if (DatabaseManager.getInstance().getPasswordList().contains(Passwords)) {
                         Toast.makeText(getApplicationContext(), "This account password already exists", Toast.LENGTH_LONG).show();
                         CODE.setText("");
@@ -329,34 +341,57 @@ public class AdminAddNew extends Activity {
             }
         });
 
-        // case 5
+        // case 5 and case 7
         savedevice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String name = NameD.getText().toString();
-                if (name.equals("")) {
-                    Toast.makeText(AdminAddNew.this, "Device name cannot be empty", Toast.LENGTH_SHORT).show();
-                } else if (name.contains(" ")) {
-                    Toast.makeText(AdminAddNew.this, "No spaces allowed", Toast.LENGTH_SHORT).show();
-                    NameD.setText("");
-                }else {
-                    if (DatabaseManager.getInstance().getDeviceList().contains(name)) {
-                        Toast.makeText(AdminAddNew.this, "This device name already exists", Toast.LENGTH_SHORT).show();
+                if (usecase == 7){
+                    if (name.equals("")) {
+                        Toast.makeText(AdminAddNew.this, "Device name cannot be empty", Toast.LENGTH_SHORT).show();
+                    } else if (name.contains(" ")) {
+                        Toast.makeText(AdminAddNew.this, "No spaces allowed", Toast.LENGTH_SHORT).show();
+                        NameD.setText("");
                     } else {
-                        //get the nude of the module
-                        String companyname = deviceinformation[0];
-                        String location = deviceinformation[1];
-                        String devicetype = deviceinformation[2];
-                        String devicedetail = deviceinformation[3];
-                        Integer devicenude = Integer.parseInt(deviceinformation[4]);
-                        DatabaseManager.getInstance().addDevice(name, devicenude, sectorName,companyname, location, devicetype, devicedetail);
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                        Toast.makeText(getApplicationContext(), "Data saved successfully!", Toast.LENGTH_LONG).show();
-                        Intent startNewActivityIntent = new Intent(AdminAddNew.this, AdminPage.class);
-                        ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
-                        startNewActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        activityadminStack.push("AdminPage", startNewActivityIntent);
+                        if (name.equals(deviceName)) {
+                            Toast.makeText(AdminAddNew.this, "This new device name is the same as the old name.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            //get the nude of the module
+                            DatabaseManager.getInstance().changeDeviceName(deviceName, name);
+                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                            Toast.makeText(getApplicationContext(), "Data saved successfully!", Toast.LENGTH_LONG).show();
+                            Intent startNewActivityIntent = new Intent(AdminAddNew.this, AdminPage.class);
+                            ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
+                            startNewActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            activityadminStack.push("AdminPage", startNewActivityIntent);
+                        }
+                    }
+                }else {
+                    if (name.equals("")) {
+                        Toast.makeText(AdminAddNew.this, "Device name cannot be empty", Toast.LENGTH_SHORT).show();
+                    } else if (name.contains(" ")) {
+                        Toast.makeText(AdminAddNew.this, "No spaces allowed", Toast.LENGTH_SHORT).show();
+                        NameD.setText("");
+                    } else {
+                        if (DatabaseManager.getInstance().getDeviceList().contains(name)) {
+                            Toast.makeText(AdminAddNew.this, "This device name already exists", Toast.LENGTH_SHORT).show();
+                        } else {
+                            //get the nude of the module
+                            String companyname = deviceinformation[0];
+                            String location = deviceinformation[1];
+                            String devicetype = deviceinformation[2];
+                            String devicedetail = deviceinformation[3];
+                            Integer devicenude = Integer.parseInt(deviceinformation[4]);
+                            DatabaseManager.getInstance().addDevice(name, devicenude, sectorName, companyname, location, devicetype, devicedetail);
+                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                            Toast.makeText(getApplicationContext(), "Data saved successfully!", Toast.LENGTH_LONG).show();
+                            Intent startNewActivityIntent = new Intent(AdminAddNew.this, AdminPage.class);
+                            ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
+                            startNewActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            activityadminStack.push("AdminPage", startNewActivityIntent);
+                        }
                     }
                 }
             }

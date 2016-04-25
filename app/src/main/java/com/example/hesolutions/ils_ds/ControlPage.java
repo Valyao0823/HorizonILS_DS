@@ -221,6 +221,8 @@ public class ControlPage extends Activity {
                             controlbuilder.setCancelable(false);
                             controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
+                                    Calendar rightnow = Calendar.getInstance();
+                                    DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " disabled the manual control of "+ device);
                                     // contorl = 0 , intensity = 0
                                     DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 0);
                                 }
@@ -228,6 +230,8 @@ public class ControlPage extends Activity {
                             controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    Calendar rightnow = Calendar.getInstance();
+                                    DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned off " + device);
                                     // control = 1, intensity = 0
                                     DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 1);
                                 }
@@ -236,6 +240,8 @@ public class ControlPage extends Activity {
                             controlalertdialog.show();
                         }
                     } else {
+                        Calendar rightnow = Calendar.getInstance();
+                        DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned on " + device + " to " + progressfinal + "%");
                         // control = 1, intensity = progress value
                         DatabaseManager.getInstance().updateDeviceIntensity(device, progressfinal, 1);
                     }
@@ -255,6 +261,8 @@ public class ControlPage extends Activity {
                     IntensitynumSector.setVisibility(View.INVISIBLE);
                     IntensitySector.setVisibility(View.INVISIBLE);
                     if (switchid.isChecked() == true) {
+                        Calendar rightnow = Calendar.getInstance();
+                        DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned on " + devicename + " to 100%");
                         // control = 1 , intensity = 100;
                         DatabaseManager.getInstance().updateDeviceIntensity(devicename, 100, 1);
                     } else {
@@ -266,6 +274,8 @@ public class ControlPage extends Activity {
                             controlbuilder.setCancelable(false);
                             controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
+                                    Calendar rightnow = Calendar.getInstance();
+                                    DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " disabled the manual control of "+ devicename);
                                     // control = 0, intensity = 0
                                     DatabaseManager.getInstance().updateDeviceIntensity(devicename, 0, 0);
                                 }
@@ -273,6 +283,8 @@ public class ControlPage extends Activity {
                             controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    Calendar rightnow = Calendar.getInstance();
+                                    DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned off " + devicename);
                                     // control = 1, intensity = 0;
                                     DatabaseManager.getInstance().updateDeviceIntensity(devicename, 0, 1);
                                 }
@@ -393,6 +405,8 @@ public class ControlPage extends Activity {
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     seekBar.setEnabled(true);
                     IntensitynumSector.setText(Integer.toString(progressfinal) + "%");
+                    final String sectornamelist = sectornameT.getText().toString();
+                    final ArrayList<String> devicenamelist = DatabaseManager.getInstance().showDeviceforsector(sectornamelist);
                     final byte[] SetParams = new byte[5];
                     if (progressfinal == 0) {
                         SetParams[0] = (byte) 17;
@@ -416,8 +430,10 @@ public class ControlPage extends Activity {
                             controlbuilder.setCancelable(false);
                             controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
+                                    Calendar rightnow = Calendar.getInstance();
+                                    DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " disabled the manual control of "+ sectornamelist);
                                     // Control = 0, intensity = 0;
-                                    for (String device : devicelist) {
+                                    for (String device : devicenamelist) {
                                         DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 0);
                                     }
                                 }
@@ -425,8 +441,10 @@ public class ControlPage extends Activity {
                             controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    Calendar rightnow = Calendar.getInstance();
+                                    DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned off " + sectornamelist);
                                     // Control = 1, intensity =0
-                                    for (String device : devicelist) {
+                                    for (String device : devicenamelist) {
                                         DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 1);
                                     }
                                 }
@@ -435,8 +453,10 @@ public class ControlPage extends Activity {
                             controlalertdialog.show();
                         }
                     } else {
+                        Calendar rightnow = Calendar.getInstance();
+                        DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned on " + sectornamelist + " to " + progressfinal + "%");
                         // Control = 1, intensity = progress value
-                        for (String device : devicelist) {
+                        for (String device : devicenamelist) {
                             DatabaseManager.getInstance().updateDeviceIntensity(device, progressfinal, 1);
                         }
                     }
@@ -455,6 +475,8 @@ public class ControlPage extends Activity {
                     if (!sectorname.equals(" ")) {
                         if (devicelist != null && !devicelist.isEmpty()) {
                             if (switchid.isChecked() == true) {
+                                Calendar rightnow = Calendar.getInstance();
+                                DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned on " + sectorname + " to 100%");
                                 // control = 1, intensity = 100;
                                 for (String device : devicelist) {
                                     DatabaseManager.getInstance().updateDeviceIntensity(device, 100, 1);
@@ -468,6 +490,8 @@ public class ControlPage extends Activity {
                                     controlbuilder.setCancelable(false);
                                     controlbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
+                                            Calendar rightnow = Calendar.getInstance();
+                                            DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " disabled the manual control of "+ sectorname);
                                             // control = 0, intensity = 0;
                                             for (String device : devicelist) {
                                                 DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 0);
@@ -477,6 +501,8 @@ public class ControlPage extends Activity {
                                     controlbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
+                                            Calendar rightnow = Calendar.getInstance();
+                                            DatabaseManager.getInstance().addRecord(rightnow.getTime().getTime(), username + " turned off " + sectorname);
                                             // control = 1, intensity = 0;
                                             for (String device : devicelist) {
                                                 DatabaseManager.getInstance().updateDeviceIntensity(device, 0, 1);
