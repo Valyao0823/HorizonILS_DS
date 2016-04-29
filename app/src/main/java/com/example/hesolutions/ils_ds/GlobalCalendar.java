@@ -1,6 +1,7 @@
 package com.example.hesolutions.ils_ds;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 import com.mylibrary.WeekViewEvent;
 import com.mylibrary.WeekView;
 import com.mylibrary.MonthLoader;
+import com.zxing.activity.CaptureActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,33 +85,71 @@ public class GlobalCalendar extends Activity{
         WeekView.EventLongPressListener mEventLongPressListener = new WeekView.EventLongPressListener() {
             @Override
             public void onEventLongPress(final WeekViewEvent event, RectF eventRect) {
-
-                if (event.getName().equals(loginname))
-                {
-                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(GlobalCalendar.this.getParent());
-                    alertDialog.setTitle("Warning");
-                    alertDialog.setMessage("Do you want to remove this event?");
-                    alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            DatabaseManager.getInstance().removeEvent(event);
-                            dialog.cancel();
-                            Intent startNewActivityIntent = new Intent(getIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View layout = inflater.inflate(R.layout.devicedialog, null, true);
+                AlertDialog.Builder builder = new AlertDialog.Builder(GlobalCalendar.this.getParent())
+                        .setView(layout);
+                final AlertDialog alertDialog = builder.create();
+                Button loaddevice = (Button) layout.findViewById(R.id.loaddevice);
+                loaddevice.setText("Edit Event");
+                loaddevice.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (event.getName().equals(loginname))
+                        {
+                            View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+                            Bitmap bitmap = getScreenShot(rootView);
+                            DataManager.getInstance().setBitmap(bitmap);
+                            DataManager.getInstance().setEvent(event);
+                            Intent startNewActivityIntent = new Intent(GlobalCalendar.this, EditEvent.class);
+                            startNewActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             ActivityStack activityStack = (ActivityStack) getParent();
-                            activityStack.push("RemoveEvent", startNewActivityIntent);
+                            activityStack.push("SecondActivity", startNewActivityIntent);
+                            alertDialog.dismiss();
 
+                        }else
+                        {
+                            Toast.makeText(GlobalCalendar.this, "Do not have permission!", Toast.LENGTH_SHORT).show();
                         }
-                    });
-                    alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
+                    }
+                });
+
+                Button scannerpage = (Button) layout.findViewById(R.id.scannerpage);
+                scannerpage.setText("Delete Event");
+                scannerpage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                        if (event.getName().equals(loginname))
+                        {
+                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(GlobalCalendar.this.getParent());
+                            alertDialog.setTitle("Warning");
+                            alertDialog.setMessage("Do you want to remove this event?");
+                            alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    DatabaseManager.getInstance().removeEvent(event);
+                                    dialog.cancel();
+                                    Intent startNewActivityIntent = new Intent(getIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                    ActivityStack activityStack = (ActivityStack) getParent();
+                                    activityStack.push("RemoveEvent", startNewActivityIntent);
+                                    dialog.cancel();
+
+                                }
+                            });
+                            alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            });
+                            alertDialog.show();
+                        }else
+                        {
+                            Toast.makeText(GlobalCalendar.this, "Do not have permission!", Toast.LENGTH_SHORT).show();
                         }
-                    });
-                    alertDialog.show();
-                }else
-                {
-                    Toast.makeText(GlobalCalendar.this, "Do not have permission!", Toast.LENGTH_SHORT).show();
-                }
+                    }
+                });
+                alertDialog.show();
 
             }
         };

@@ -39,13 +39,12 @@ public class ControlPage extends Activity {
     EnhancedSeekBar seekBar, seekBarSector;
     int intensity, sectorintensity;
     ImageView imageViewroomlayout;
-    ExpandListAdapter adapter;
+    static ExpandListAdapter adapter;
     TextView Intensity, ownertag, owner, sectortag, sectornameT, devicetag, devicenameT, Intensitynum, IntensitySector, IntensitynumSector;
-    Handler myHandler, rthandler;
+    Handler myHandler;
     Runnable myRunnable;
     AlertDialog controlalertdialog;
     AlertDialog.Builder controlbuilder = null;
-    Timer rtstatus;
     String choosesector;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,23 +83,7 @@ public class ControlPage extends Activity {
                 startActivity(intent);
             }
         };
-        myHandler.postDelayed(myRunnable, 3*60*1000);
-
-        rtstatus = new Timer();
-        rthandler = new Handler();
-        rtstatus.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                rthandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (adapter!=null) {
-                            adapter.notifyDataSetChanged();
-                        }
-                    }
-                });
-            }
-        }, Calendar.getInstance().getTime(), 5 * 1000);
+        myHandler.postDelayed(myRunnable, 3 * 60 * 1000);
 
     }
 
@@ -576,7 +559,6 @@ public class ControlPage extends Activity {
     public void onPause()
     {
         super.onPause();
-        rtstatus.cancel();
     }
     @Override
     public void onBackPressed()
@@ -588,7 +570,11 @@ public class ControlPage extends Activity {
     public void onDestroy()
     {
         super.onDestroy();
-        rtstatus.cancel();
         myHandler.removeCallbacks(myRunnable);
+    }
+
+    public static void RefreshList()
+    {
+        if (adapter!=null) {adapter.notifyDataSetChanged();}
     }
 }

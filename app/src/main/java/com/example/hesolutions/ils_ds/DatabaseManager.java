@@ -51,7 +51,7 @@ public class DatabaseManager {
             this.mDBHelper.close();
             this.mDBHelper = null;
         }
-        this.mDBHelper = new DatabaseHelper(context, SRC_DEVICE_DATABASE_NAME, SRC_DEVICE_DATABASE_NAME);
+        this.mDBHelper = new DatabaseHelper(context, SRC_DEVICE_DATABASE_NAME);
         this.mDataBase = this.mDBHelper.getWritableDatabase();
     }
 
@@ -192,13 +192,13 @@ public class DatabaseManager {
     }
     //========================================Device=======================================
 
-    public boolean addDevice(String devicename, int nude, String sectorname, String companyname, String location, String devicetype, String devicedetail)
+    public boolean addDevice(String devicename, int node, String sectorname, String companyname, String location, String devicetype, String devicedetail)
     {
         Object[] objArr = null;
         if (this.mDataBase != null) {
             objArr = new Object[10];
             objArr[0] = String.valueOf(devicename);
-            objArr[1] = Integer.valueOf(nude);
+            objArr[1] = Integer.valueOf(node);
             objArr[2] = Integer.valueOf((short)0); // defalut value of intensity
             objArr[3] = Integer.valueOf((short)0); // defalut value of control
             objArr[4] = String.valueOf(sectorname);
@@ -222,6 +222,22 @@ public class DatabaseManager {
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             devicelist.add(cursor.getString(0));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return devicelist;
+    }
+
+    public ArrayList<Integer> getDeviceNodeList()
+    {
+        ArrayList<Integer> devicelist = new ArrayList<>();
+        Cursor cursor = this.mDataBase.rawQuery("SELECT DeviceNode FROM DeviceTable", null);
+        if (cursor == null) {
+            return null;
+        }
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            devicelist.add(cursor.getInt(0));
             cursor.moveToNext();
         }
         cursor.close();
@@ -283,17 +299,17 @@ public class DatabaseManager {
         return  control;
     }
 
-    public Integer getDeviceNude(String devicename)
+    public Integer getDeviceNode(String devicename)
     {
-        int nude = 0;
-        Cursor cursor = this.mDataBase.rawQuery("SELECT DeviceNude FROM DeviceTable WHERE DeviceName = ?", new String[]{String.valueOf(devicename)});
+        int node = 0;
+        Cursor cursor = this.mDataBase.rawQuery("SELECT DeviceNode FROM DeviceTable WHERE DeviceName = ?", new String[]{String.valueOf(devicename)});
         if (cursor == null) {
             return null;
         }
         cursor.moveToFirst();
-        nude = cursor.getInt(0);
+        node = cursor.getInt(0);
         cursor.close();
-        return  nude;
+        return  node;
     }
 
     public boolean updateDevicefromSector(String devicename, String sectorname)
@@ -321,11 +337,11 @@ public class DatabaseManager {
     }
 
 
-    public boolean updateDeviceFeedBack(int nude, int intensity)
+    public boolean updateDeviceFeedBack(int node, int feedback)
     {
         try {
             if (this.mDataBase != null) {
-                this.mDataBase.execSQL("UPDATE DeviceTable SET Intensity = ? WHERE DeviceNude = ?", new Object[]{Integer.valueOf(intensity),Integer.valueOf(nude)});
+                this.mDataBase.execSQL("UPDATE DeviceTable SET FeedBack = ? WHERE DeviceNode = ?", new Object[]{Integer.valueOf(feedback),Integer.valueOf(node)});
                 return true;
             }
         } catch (Exception e) {
@@ -496,7 +512,7 @@ public class DatabaseManager {
         Calendar startTime = Calendar.getInstance();
         Cursor cursor = this.mDataBase.rawQuery("SELECT StartTime FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
         cursor.moveToFirst();
-        Date st = new Date(cursor.getLong(1));
+        Date st = new Date(cursor.getLong(0));
         startTime.setTime(st);
         cursor.close();
         return startTime;
@@ -507,7 +523,7 @@ public class DatabaseManager {
         Calendar finishTime = Calendar.getInstance();
         Cursor cursor = this.mDataBase.rawQuery("SELECT FinishTime FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
         cursor.moveToFirst();
-        Date ft = new Date(cursor.getLong(2));
+        Date ft = new Date(cursor.getLong(0));
         finishTime.setTime(ft);
         cursor.close();
         return finishTime;
@@ -518,7 +534,7 @@ public class DatabaseManager {
         String sectorlist;
         Cursor cursor = this.mDataBase.rawQuery("SELECT SectorList FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
         cursor.moveToFirst();
-        sectorlist = cursor.getString(3);
+        sectorlist = cursor.getString(0);
         cursor.close();
         return sectorlist;
     }
@@ -526,11 +542,24 @@ public class DatabaseManager {
     public Integer getEventIntensity(WeekViewEvent event)
     {
         Integer intensity;
-        Cursor cursor = this.mDataBase.rawQuery("SELECT SectorList FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
+        Cursor cursor = this.mDataBase.rawQuery("SELECT Intensity FROM EventsTable WHERE ID = ?", new String[]{String.valueOf(event.getId())});
         cursor.moveToFirst();
-        intensity = cursor.getInt(6);
+        intensity = cursor.getInt(0);
         cursor.close();
         return intensity;
+    }
+
+    public boolean updateEvent(long startTime, long finishtTime, String sectorlist, int intensity, long id)
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("UPDATE EventsTable SET StartTime = ?, FinishTime = ?, SectorList = ?, Intensity = ? WHERE ID = ?", new Object[]{String.valueOf(startTime), String.valueOf(finishtTime),
+                        String.valueOf(sectorlist), String.valueOf(intensity), String.valueOf(id)});
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
     }
 
     //=============================================Record =======================================================
@@ -561,6 +590,18 @@ public class DatabaseManager {
         }
         cursor.close();
         return recordlist;
+    }
+
+    public boolean deleteRecord()
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM RecordTable");
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
     }
 }
 

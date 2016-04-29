@@ -56,7 +56,6 @@ public class CalendarTask extends Activity {
     Button cancelTOcalendar;
     Switch switch1;
     EditText weeknumber;
-    TextView textView4,textView5;
     Integer weeks;
     RelativeLayout layout1, progresslayout;
     CheckBox Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday;
@@ -84,8 +83,6 @@ public class CalendarTask extends Activity {
         cancelTOcalendar = (Button)findViewById(R.id.cancelTOcalendar);
         switch1 =(Switch)findViewById(R.id.switch1);
         weeknumber = (EditText)findViewById(R.id.weeknumber);
-        textView4 = (TextView)findViewById(R.id.textView4);
-        textView5 = (TextView)findViewById(R.id.textView5);
         layout1 = (RelativeLayout)findViewById(R.id.layout1);
         Sunday = (CheckBox)findViewById(R.id.Sunday);
         Monday = (CheckBox)findViewById(R.id.Monday);
@@ -656,9 +653,10 @@ public class CalendarTask extends Activity {
         Intensitynum.setText("100%");
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            private int finalprogress;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                intensity = progress;
+                finalprogress = progress;
                 Intensitynum.setText(Integer.toString(progress) + "%");
             }
 
@@ -669,7 +667,7 @@ public class CalendarTask extends Activity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                intensity = finalprogress;
             }
         });
 

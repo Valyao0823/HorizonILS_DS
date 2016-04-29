@@ -156,8 +156,8 @@
         android:layout_alignParentStart="true" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="200dp"
         android:layout_toLeftOf="@+id/mainUi"
         android:layout_toEndOf="@+id/mainUi"
         android:id="@+id/recorddata"
@@ -165,5 +165,13 @@
         android:scrollbars="vertical"
         android:layout_above="@+id/record"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear records"
+        android:id="@+id/clear"
+        android:layout_alignTop="@+id/record"
+        android:layout_toEndOf="@+id/record" />
 
 </RelativeLayout>

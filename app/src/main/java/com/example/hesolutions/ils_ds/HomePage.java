@@ -3,7 +3,12 @@ package com.example.hesolutions.ils_ds;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,14 +42,14 @@ import java.util.TimerTask;
 public class HomePage extends Activity {
     TextView CODE1, CODE2, CODE3, CODE4, recorddata;
     GridView gridView;
-    Button radioButton1, radioButton2, radioButton3, radioButton4, record;
+    Button radioButton1, radioButton2, radioButton3, radioButton4, record, clear;
     boolean jump = false;
     boolean emergency = false;
     Switch switch1;
     ImageView emergencypic;
     Handler myHandler;
     Runnable myRunnable;
-    TCPConnection tcpConnection = new TCPConnection();
+    TCPClient mTcpClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -63,6 +68,7 @@ public class HomePage extends Activity {
         radioButton4 = (Button) findViewById(R.id.radioButton4);
         recorddata = (TextView)findViewById(R.id.recorddata);
         record = (Button) findViewById(R.id.record);
+        clear = (Button) findViewById(R.id.clear);
         switch1 = (Switch) findViewById(R.id.switch1);
         emergencypic = (ImageView) findViewById(R.id.emergencypic);
 
@@ -75,7 +81,7 @@ public class HomePage extends Activity {
                 startActivity(intent);
             }
         };
-        myHandler.postDelayed(myRunnable, 60*3* 1000);
+        myHandler.postDelayed(myRunnable, 60 * 3 * 1000);
 
         final GridView gridView = (GridView) findViewById(R.id.gridView);
 
@@ -88,10 +94,6 @@ public class HomePage extends Activity {
 
         gridView.setAdapter(adapter);
 
-        //Initialize the TCP connection
-
-        tcpConnection.execute("");
-
         Calendar today = Calendar.getInstance();
 
         final Timer maintimer = new Timer();
@@ -99,18 +101,38 @@ public class HomePage extends Activity {
 
             @Override
             public void run() {
-                    if (emergency == false) {
-                        MakeAlert();
-                    } else {
-                        ArrayList<String> devicelist = DatabaseManager.getInstance().getDeviceList();
-                        for (String devicename : devicelist) {
-                            // emergency is on: intensity = 100, control = 0
-                            int modulenumber = DatabaseManager.getInstance().getDeviceNude(devicename);
-                            tcpConnection.doInBackground("AT+TXA="+modulenumber+"<100>");
+                // if the gateway is not four-faith, reconnect;
+                if (!CheckSSID()){
+                    ConnectServer();
+                }else {
+                    // after getting the right gw
+                    // case 3: normal situation
+                    if (mTcpClient != null && mTcpClient.isConnected()) {
+                        System.out.println("*************case3");
+                        if (emergency == false) {
+                            MakeAlert();
+                        } else {
+                            ArrayList<String> devicelist = DatabaseManager.getInstance().getDeviceList();
+                            for (String devicename : devicelist) {
+                                // emergency is on: intensity = 100, control = 0
+                                int modulenumber = DatabaseManager.getInstance().getDeviceNode(devicename);
+                                mTcpClient.sendMessage("AT+TXA=" + modulenumber + "<100>");
+                            }
                         }
+                    } else if (mTcpClient != null && !mTcpClient.isConnected()) {
+                        // case2: after timeout or any internet error, try to reconnect
+                        System.out.println("*************case2");
+                        mTcpClient.stopClient();
+                        new TCPConnection().execute("");
+
+                    } else {
+                        // case1: first connection
+                        System.out.println("*************case1");
+                        new TCPConnection().execute("");
                     }
+                }
             }
-        }, today.getTime(), 1000 * 20);
+        }, today.getTime(), 1000 * 5);
 
 
         switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -127,8 +149,8 @@ public class HomePage extends Activity {
                     myHandler.removeCallbacks(myRunnable);
                     // emergency is on: intensity = 100, control = 0
                     for (String devicename : devicelist) {
-                        int modulenumber = DatabaseManager.getInstance().getDeviceNude(devicename);
-                        tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<100>");
+                        int modulenumber = DatabaseManager.getInstance().getDeviceNode(devicename);
+                        mTcpClient.sendMessage("AT+TXA=" + modulenumber + "<100>");
                     }
                 } else {
                     emergency = false;
@@ -143,15 +165,22 @@ public class HomePage extends Activity {
         record.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (recorddata.getVisibility() == View.VISIBLE)
-                {
+                if (recorddata.getVisibility() == View.VISIBLE) {
                     recorddata.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     ArrayList<String> data = DatabaseManager.getInstance().showRecord();
                     recorddata.setVisibility(View.VISIBLE);
                     recorddata.setText(data.toString());
                     recorddata.setMovementMethod(new ScrollingMovementMethod());
                 }
+            }
+        });
+
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseManager.getInstance().deleteRecord();
+                if (recorddata.getVisibility() == View.VISIBLE) {recorddata.setText("");}
             }
         });
     }
@@ -160,43 +189,57 @@ public class HomePage extends Activity {
         Calendar cal = Calendar.getInstance();
         ArrayList<WeekViewEvent> events = DatabaseManager.getInstance().loadEvent();
         ArrayList<String> devicelist = DatabaseManager.getInstance().getDeviceList();
-        if (events.size()> 0) {
-            for (WeekViewEvent event: events) {
+        if (events.size() > 0) {
+            for (WeekViewEvent event : events) {
                 Calendar eventstart = DatabaseManager.getInstance().getEventStart(event);
                 Calendar eventfinish = DatabaseManager.getInstance().getEventFinish(event);
                 if (cal.before(eventfinish) && cal.after(eventstart)) {
                     String sectorlist = DatabaseManager.getInstance().getEventSector(event);
-                    for (String sub: sectorlist.split(","))
-                    {
+                    for (String sub : sectorlist.split(",")) {
                         ArrayList<String> devicefromsector = DatabaseManager.getInstance().showDeviceforsector(sub);
-                        for (String dev: devicefromsector)
-                        {
-                            if (devicelist.contains(dev))devicelist.remove(dev);
+                        for (String dev : devicefromsector) {
+                            if (devicelist.contains(dev)) devicelist.remove(dev);
                             int control = DatabaseManager.getInstance().getDeviceControl(dev);
-                            int nude = DatabaseManager.getInstance().getDeviceNude(dev);
-                            if (control==1) {
+                            int node = DatabaseManager.getInstance().getDeviceNode(dev);
+                            if (control == 1) {
                                 int intensity = DatabaseManager.getInstance().getDeviceIntensity(dev);
-                                tcpConnection.doInBackground("AT+TXA=" + nude + "<" +intensity + ">");
-                            }else
-                            {
+                                //System.out.println("****** controlled " + "AT+TXA=" + node + ",<" +intensity + ">");
+                                mTcpClient.sendMessage("AT+TXA=" + node + ",<" + intensity + ">" + "\n");
+                            } else {
                                 int intensity = DatabaseManager.getInstance().getEventIntensity(event);
-                                tcpConnection.doInBackground("AT+TXA=" + nude + "<" +intensity + ">");
+                                //System.out.println("****** not controlled " + "AT+TXA=" + node + ",<" +intensity + ">");
+                                mTcpClient.sendMessage("AT+TXA=" + node + ",<" + intensity + ">" + "\n");
                             }
                         }
                     }
                 }
             }
-            for (String device : devicelist)
-            {
-                int modulenumber = DatabaseManager.getInstance().getDeviceNude(device);
-                tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<0>");
+
+            for (String device : devicelist) {
+                int modulenumber = DatabaseManager.getInstance().getDeviceNode(device);
+                int intensity = DatabaseManager.getInstance().getDeviceIntensity(device);
+                int control = DatabaseManager.getInstance().getDeviceControl(device);
+                if (control == 1 && intensity > 0) {
+                    //System.out.println("****** not controlled here 1 " + "AT+TXA=" + modulenumber + ",<"+ intensity + ">");
+                    mTcpClient.sendMessage("AT+TXA=" + modulenumber + ",<" + intensity + ">" + "\n");
+                } else {
+                    //System.out.println("****** not controlled here 2 " + "AT+TXA=" + modulenumber + ",<0>");
+                    mTcpClient.sendMessage("AT+TXA=" + modulenumber + ",<0>" + "\n");
+                }
             }
-        }else
-        {
-            for (String device : devicelist)
-            {
-                int modulenumber = DatabaseManager.getInstance().getDeviceNude(device);
-                tcpConnection.doInBackground("AT+TXA=" + modulenumber + "<0>");
+
+        } else {
+            for (String device : devicelist) {
+                int modulenumber = DatabaseManager.getInstance().getDeviceNode(device);
+                int intensity = DatabaseManager.getInstance().getDeviceIntensity(device);
+                int control = DatabaseManager.getInstance().getDeviceControl(device);
+                if (control == 1 && intensity > 0) {
+                    //System.out.println("****** not event controlled here 1 " + "AT+TXA=" + modulenumber + ",<"+ intensity + ">");
+                    mTcpClient.sendMessage("AT+TXA=" + modulenumber + ",<" + intensity + ">" + "\n");
+                } else {
+                    //System.out.println("****** not event controlled here 2 " + "AT+TXA=" + modulenumber + ",<0>");
+                    mTcpClient.sendMessage("AT+TXA=" + modulenumber + ",<0>" + "\n");
+                }
             }
         }
 
@@ -335,41 +378,70 @@ public class HomePage extends Activity {
     }
 
     public class TCPConnection extends AsyncTask<String, String, String> {
-        TCPClient mTcpClient;
         @Override
         protected String doInBackground(String... sendmessage) {
             //we create a TCPClient object and
-
-            if (mTcpClient!=null && mTcpClient.isConnected())
-            {
-                mTcpClient.sendMessage(sendmessage[0]);
-            }else {
-                mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
-                    @Override
-                    //here the messageReceived method is implemented
-                    public void messageReceived(String message) {
-                        //this method calls the onProgressUpdate
-                        RetrieveMessage(message);
-                    }
-                });
-                mTcpClient.run();
-            }
+            mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
+                @Override
+                //here the messageReceived method is implemented
+                public void messageReceived(String message) {
+                    //this method calls the onProgressUpdate
+                    publishProgress(message);
+                }
+            });
+            mTcpClient.run();
             return null;
+        }
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            String message = values[0];
+            if (message.length()<=12 && message.length()>=10 && message.contains(",")) {
+                System.out.println("*********" + message);
+                String[] sub = message.split(",", 2);
+                if (sub[0].substring(0,5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 0 && Integer.parseInt(sub[1]) <= 100) {
+                    Integer node = Integer.parseInt(sub[0].substring(5, 8));
+                    Integer feedback = Integer.parseInt(sub[1]);
+                    if (DatabaseManager.getInstance().getDeviceNodeList().contains(node)) {
+                        DatabaseManager.getInstance().updateDeviceFeedBack(node, feedback);
+                        ControlPage.RefreshList();
+                    }
+                }
+            }
         }
 
     }
 
-    public void RetrieveMessage(String message)
+    public boolean CheckSSID()
     {
-        System.out.println("***********" + message);
-        if (message.length()<=12 && message.length()>=10 && message.contains(",")) {
-            String[] sub = message.split(",", 2);
-            if (sub[0].substring(1, 5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 100 && Integer.parseInt(sub[1]) <= 100) {
-                Integer nude = Integer.parseInt(sub[0].substring(6, 8));
-                Integer intensity = Integer.parseInt(sub[1]);
-                DatabaseManager.getInstance().updateDeviceFeedBack(nude, intensity);
-            }
+        WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifi.getConnectionInfo();
+        String ssid = wifiInfo.getSSID();
+        System.out.println("***************** ssid " + ssid);
+        if (ssid.equals("\"Four-Faith\"")){
+            return true;
         }
+        else {return false;}
+    }
+
+    public boolean ConnectServer()
+    {
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        // setup a wifi configuration
+        WifiConfiguration wc = new WifiConfiguration();
+        wc.SSID = "\"Four-Faith\"";
+        wc.status = WifiConfiguration.Status.ENABLED;
+        wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+        wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+        wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+        wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+        wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+// connect to and enable the connection
+        int netId = wifiManager.addNetwork(wc);
+        wifiManager.enableNetwork(netId, true);
+        wifiManager.setWifiEnabled(true);
+        return true;
     }
 
 }

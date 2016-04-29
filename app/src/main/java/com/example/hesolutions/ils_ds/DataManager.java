@@ -2,6 +2,8 @@ package com.example.hesolutions.ils_ds;
 
 import android.graphics.Bitmap;
 
+import com.mylibrary.WeekViewEvent;
+
 /**
  * Created by hesolutions on 2016-04-14.
  */
@@ -39,4 +41,11 @@ public class DataManager {
         return popactivity;
     }
     public String setactivity(String s) {this.popactivity = s;return popactivity;}
+
+    public WeekViewEvent event;
+    public WeekViewEvent getEvent()
+    {
+        return event;
+    }
+    public WeekViewEvent setEvent(WeekViewEvent e) {this.event = e;return event;}
 }

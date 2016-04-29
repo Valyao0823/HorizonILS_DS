@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Description
@@ -36,7 +37,7 @@ public class TCPClient {
     private PrintWriter mBufferOut;
     // used to read messages from the server
     private BufferedReader mBufferIn;
-
+    private Socket socket;
     /**
      * Constructor of the class. OnMessagedReceived listens for the messages received from server
      */
@@ -83,45 +84,43 @@ public class TCPClient {
 
     public void run() {
 
-        mRun = true;
-
         try {
             //here you must put your computer's IP address.
             InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
 
             Log.e("TCP Client", "C: Connecting...");
-
             //create a socket to make the connection with the server
-            Socket socket = new Socket(serverAddr, SERVER_PORT);
-
+            socket = new Socket(serverAddr, SERVER_PORT);
+            socket.setKeepAlive(true);
             try {
+                mRun = true;
                 Log.i("Debug", "inside try catch");
                 mBufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
                 //receives the message which the server sends back
                 mBufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 // send login name
                 while (mRun) {
-                    mServerMessage = mBufferIn.readLine();
-                    if (mServerMessage != null && mMessageListener != null) {
-                        //call the method messageReceived from MyActivity class
-                        mMessageListener.messageReceived(mServerMessage);
-                    }
-
+                        mServerMessage = mBufferIn.readLine();
+                        if (mServerMessage != null && mMessageListener != null) {
+                            //call the method messageReceived from MyActivity class
+                            mMessageListener.messageReceived(mServerMessage);
+                        }
                 }
                 Log.e("RESPONSE FROM SERVER", "S: Received Message: '" + mServerMessage + "'");
 
             } catch (Exception e) {
-
+                mRun = false;
                 Log.e("TCP", "S: Error", e);
 
             } finally {
                 //the socket must be closed. It is not possible to reconnect to this socket
                 // after it is closed, which means a new socket instance has to be created.
+                System.out.println("********************** socket is closed");
                 socket.close();
             }
 
         } catch (Exception e) {
-
+            mRun = false;
             Log.e("TCP", "C: Error", e);
 
         }

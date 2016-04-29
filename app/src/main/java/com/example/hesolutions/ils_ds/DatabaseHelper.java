@@ -4,6 +4,7 @@ package com.example.hesolutions.ils_ds;
  * Created by hesolutions on 2016-04-14.
  */
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
@@ -20,54 +21,69 @@ import java.nio.channels.FileChannel;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 7;
     private final Context context;
-    private boolean createDatabase;
     private String mDataBaseName;
-    public final File mFile;
-    private String mSrcDataBaseName;
-
-    public DatabaseHelper(Context context, String dataBaseName, String srcDataBaseName) {
+    private File sdFile;
+    public DatabaseHelper(Context context, String dataBaseName) {
         super(context, dataBaseName, null, DATABASE_VERSION);
-        this.createDatabase = false;
         this.context = context;
         this.mDataBaseName = dataBaseName;
-        this.mSrcDataBaseName = srcDataBaseName;
-
-        File root = Environment.getExternalStorageDirectory();
-        File dir = new File(root.getAbsolutePath() + "/horizon_ds");
-        File file = new File(dir, this.mSrcDataBaseName);
-        this.mFile = file;
-
-        //this.mFile = context.getDatabasePath(this.mDataBaseName);
+        String state;
+        state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            File root = Environment.getExternalStorageDirectory();
+            File dir = new File(root.getAbsolutePath() + "/horizon_ds");
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            this.sdFile = new File(dir, this.mDataBaseName);
+        }
+        //this.sdFile = context.getDatabasePath(this.mDataBaseName);
         /*
-        if (!this.mFile.exists()) {
+        if (this.mFile.exists()) {
             this.createDatabase = true;
         }
         */
     }
 
+    @Override
     public synchronized SQLiteDatabase getWritableDatabase() {
+        /*
         SQLiteDatabase writableDatabase;
         SQLiteDatabase database = super.getWritableDatabase();
-        this.createDatabase = true;
-        if (this.createDatabase) {
-            this.createDatabase = false;
+
+        try {
+            database = copyDatabase();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        writableDatabase = database;
+        return writableDatabase;
+        */
+        SQLiteDatabase db;
+        SQLiteDatabase database = super.getWritableDatabase();
+        if(!this.sdFile.exists()){
             try {
                 database = copyDatabase();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }else {
+            database = SQLiteDatabase.openDatabase(this.sdFile.toString(), null, Context.MODE_APPEND);
         }
-        writableDatabase = database;
-        return writableDatabase;
+        db = database;
+        return db;
+
     }
 
     private SQLiteDatabase copyDatabase() throws IOException {
-        InputStream input = this.context.getAssets().open(this.mSrcDataBaseName);
-        OutputStream output = new FileOutputStream(this.mFile);
+
+        InputStream input = this.context.getAssets().open(this. mDataBaseName);
+        OutputStream output = new FileOutputStream(this.sdFile);
         copy(input, output);
         input.close();
         output.close();
-        return super.getWritableDatabase();
+        SQLiteDatabase database = SQLiteDatabase.openDatabase(this.sdFile.toString(), null, Context.MODE_PRIVATE);
+        return database;
     }
 
     public void onCreate(SQLiteDatabase db) {

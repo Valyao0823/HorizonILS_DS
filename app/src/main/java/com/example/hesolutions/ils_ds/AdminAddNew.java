@@ -147,24 +147,26 @@ public class AdminAddNew extends Activity {
                         case 1: deviceinformation[1] = substring; break; // location
                         case 2: deviceinformation[2] = substring; break; // devicetype
                         case 3: deviceinformation[3] = substring; break; // devicedetail
-                        case 4: deviceinformation[4] = substring; break; // devicenude
+                        case 4: deviceinformation[4] = substring; break; // devicenode
                     }
                     count++;
                 }
-                if (deviceinformation[0].length()==2 && deviceinformation[1].length()==2 && deviceinformation[2].length()==2
-                        && deviceinformation[3].length()==7 && deviceinformation[4].length()==3)
-                {
+                int devicenode = Integer.parseInt(deviceinformation[4]);
+                if (DatabaseManager.getInstance().getDeviceNodeList().contains(devicenode)) {
+                    boolresult = false;
+                }else if (deviceinformation[0].length()==2 && deviceinformation[1].length()==2 && deviceinformation[2].length()==2
+                        && deviceinformation[3].length()==7 && deviceinformation[4].length()==3) {
                     assignuser.setVisibility(View.GONE);
                     addNewUser.setVisibility(View.GONE);
                     addnewsector.setVisibility(View.GONE);
                     assigndevice.setVisibility(View.GONE);
                     addnewdevice.setVisibility(View.VISIBLE);
-                }else{boolresult = false;}
+                }else {boolresult = false;}
             }else {boolresult = false;}
             if (boolresult==false) {
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(AdminAddNew.this.getParent());
-                alertDialog.setTitle("Error");
-                alertDialog.setMessage("QR code error");
+                alertDialog.setTitle("QR Code Error");
+                alertDialog.setMessage("Please ......................................?");
                 alertDialog.setPositiveButton("Scan Another", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -356,7 +358,7 @@ public class AdminAddNew extends Activity {
                         if (name.equals(deviceName)) {
                             Toast.makeText(AdminAddNew.this, "This new device name is the same as the old name.", Toast.LENGTH_SHORT).show();
                         } else {
-                            //get the nude of the module
+                            //get the node of the module
                             DatabaseManager.getInstance().changeDeviceName(deviceName, name);
                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -377,13 +379,13 @@ public class AdminAddNew extends Activity {
                         if (DatabaseManager.getInstance().getDeviceList().contains(name)) {
                             Toast.makeText(AdminAddNew.this, "This device name already exists", Toast.LENGTH_SHORT).show();
                         } else {
-                            //get the nude of the module
+                            //get the node of the module
                             String companyname = deviceinformation[0];
                             String location = deviceinformation[1];
                             String devicetype = deviceinformation[2];
                             String devicedetail = deviceinformation[3];
-                            Integer devicenude = Integer.parseInt(deviceinformation[4]);
-                            DatabaseManager.getInstance().addDevice(name, devicenude, sectorName, companyname, location, devicetype, devicedetail);
+                            Integer devicenode = Integer.parseInt(deviceinformation[4]);
+                            DatabaseManager.getInstance().addDevice(name, devicenode, sectorName, companyname, location, devicetype, devicedetail);
                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                             Toast.makeText(getApplicationContext(), "Data saved successfully!", Toast.LENGTH_LONG).show();

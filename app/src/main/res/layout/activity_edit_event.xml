@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/parent"
+    tools:context="com.example.hesolutions.ils_ds.EditEvent">
+    <RelativeLayout
+        android:id="@+id/relativeblur"
+        android:layout_width="600dp"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageView"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@+id/relativeblur"
+        android:layout_marginLeft="20dp"
+        android:id="@+id/mainUi"
+        android:background="@color/backgroundcolor"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text=" START TIME    "
+            android:id="@+id/textView2"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25dp"
+            android:text="Start Date"
+            android:id="@+id/startdate"
+            android:gravity="center"
+            android:enabled="false"
+            android:background="@drawable/backrec"
+            android:textColor="@color/wordscolor"
+            android:layout_below="@+id/textView2"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25dp"
+            android:text="Start Time"
+            android:gravity="center"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/backrec"
+            android:id="@+id/starttime"
+            android:textColor="@color/wordscolor"
+            android:layout_below="@+id/startdate"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text=" FINISH TIME    "
+            android:id="@+id/textView3"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_above="@+id/startdate" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25dp"
+            android:text="Finish Date"
+            android:id="@+id/finishdate"
+            android:textColor="@color/wordscolor"
+            android:background="@drawable/backrec"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:enabled="false"
+            android:gravity="center"
+            android:layout_alignTop="@+id/startdate"
+            android:layout_alignStart="@+id/textView3"
+            android:layout_alignEnd="@+id/textView3" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25dp"
+            android:text="Finish Time"
+            android:background="@drawable/backrec"
+            android:id="@+id/finishtime"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:textColor="@color/wordscolor"
+            android:gravity="center"
+            android:layout_alignTop="@+id/starttime"
+            android:layout_alignStart="@+id/textView3"
+            android:layout_alignEnd="@+id/finishdate" />
+
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:background="@drawable/saveforevent"
+            android:id="@+id/Apply"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"></Button>
+        <!--
+        android:layout_marginBottom="30dp" />
+        -->
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:background="@drawable/cancelforevent"
+            android:id="@+id/cancelTOcalendar"
+            android:layout_toRightOf="@+id/Apply"
+            android:layout_marginLeft="30dp"
+            android:layout_alignParentBottom="true"/>
+        <!--
+        android:layout_marginBottom="30dp"
+           -->
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/starttime"
+            android:background="@drawable/backrec"
+            android:layout_alignParentRight="true"
+            android:layout_alignLeft="@+id/starttime"
+            android:layout_alignEnd="@+id/finishtime"
+            android:layout_marginRight="30dp"
+            android:layout_above="@+id/Intensity" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/sectorlistname"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="SECTOR"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="5dp" />
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/sectorlistname"
+                android:id="@+id/sectorlistView"
+                android:scrollbars="none"
+                android:divider="@color/transparent"
+                android:dividerHeight="5dp"
+                android:layout_below="@+id/sectorlistname"
+                />
+        </RelativeLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/Intensity"
+            android:text="INTENSITY"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_above="@+id/seekBar"
+            android:layout_toStartOf="@+id/cancelTOcalendar"
+            android:layout_alignEnd="@+id/starttime" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/Intensitynum"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_toRightOf="@+id/Intensity"
+            android:layout_marginLeft="20dp"
+            android:layout_alignTop="@+id/Intensity"
+            />
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekBar"
+            android:progressDrawable="@color/wordscolor"
+            android:thumb="@drawable/repswitch"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/finishtime"
+            android:layout_centerVertical="true"
+            />
+    </RelativeLayout>
+    <!--
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/progresslayout">
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar"
+            android:visibility="invisible"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+    -->
+</RelativeLayout>

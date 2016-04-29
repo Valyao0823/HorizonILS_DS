@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
 
     <application
         android:allowBackup="true"
@@ -47,7 +48,8 @@
         <activity android:name=".TabviewUser" />
         <activity android:name=".GlobalCalendar" />
         <activity android:name=".ControlPage" />
-        <activity android:name=".CalendarTask"></activity>
+        <activity android:name=".CalendarTask" />
+        <activity android:name=".EditEvent"></activity>
     </application>
 
 </manifest>
