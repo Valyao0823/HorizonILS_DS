@@ -120,10 +120,9 @@ public class AdminPage extends Activity {
                     @Override
                     public void onClick(View v) {
                         ArrayList<String> devices = DatabaseManager.getInstance().getDeviceList();
-                        if (devices==null || devices.isEmpty())
-                        {
+                        if (devices == null || devices.isEmpty()) {
                             Toast.makeText(AdminPage.this, "No device has been scanned yet.", Toast.LENGTH_SHORT).show();
-                        }else {
+                        } else {
                             View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
                             Bitmap bitmap = getScreenShot(rootView);
                             DataManager.getInstance().setBitmap(bitmap);
@@ -151,6 +150,23 @@ public class AdminPage extends Activity {
                         startNewActivityIntent.putExtra("userName", userName);
                         startNewActivityIntent.putExtra("sectorName", sectorName);
                         activityadminStack.push("Scanner", startNewActivityIntent);
+                        alertDialog.dismiss();
+                    }
+                });
+
+                Button typeQR = (Button)layout.findViewById(R.id.TypeQR);
+                typeQR.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+                        Bitmap bitmap = getScreenShot(rootView);
+                        DataManager.getInstance().setBitmap(bitmap);
+                        Intent startNewActivityIntent = new Intent(AdminPage.this, AdminAddNew.class);
+                        startNewActivityIntent.putExtra("Case", 8);
+                        startNewActivityIntent.putExtra("userName", userName);
+                        startNewActivityIntent.putExtra("sectorName", sectorName);
+                        ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
+                        activityadminStack.push("AdminAddNew", startNewActivityIntent);
                         alertDialog.dismiss();
                     }
                 });

@@ -131,11 +131,14 @@ public class AdminAddNew extends Activity {
             String password = DatabaseManager.getInstance().getPassword(userName);
             CODE.setText(password);
         } else if (usecase == 5) {
-
+            assignuser.setVisibility(View.GONE);
+            addNewUser.setVisibility(View.GONE);
+            addnewsector.setVisibility(View.GONE);
+            assigndevice.setVisibility(View.GONE);
             result = getIntent().getStringExtra("result");
             userName = getIntent().getStringExtra("userName");
             sectorName = getIntent().getStringExtra("sectorName");
-
+            NameD.setHint("Enter Device Name");
             boolean boolresult = true;
             if (result != null && result.length() == 20 && result.contains("_")) {
                 deviceinformation = new String[5];
@@ -156,10 +159,6 @@ public class AdminAddNew extends Activity {
                     boolresult = false;
                 }else if (deviceinformation[0].length()==2 && deviceinformation[1].length()==2 && deviceinformation[2].length()==2
                         && deviceinformation[3].length()==7 && deviceinformation[4].length()==3) {
-                    assignuser.setVisibility(View.GONE);
-                    addNewUser.setVisibility(View.GONE);
-                    addnewsector.setVisibility(View.GONE);
-                    assigndevice.setVisibility(View.GONE);
                     addnewdevice.setVisibility(View.VISIBLE);
                 }else {boolresult = false;}
             }else {boolresult = false;}
@@ -206,6 +205,16 @@ public class AdminAddNew extends Activity {
             addNewUser.setVisibility(View.GONE);
             addnewsector.setVisibility(View.GONE);
             addnewdevice.setVisibility(View.VISIBLE);
+            NameD.setHint("Enter Device Name");
+        }else  if (usecase == 8){
+            assigndevice.setVisibility(View.GONE);
+            assignuser.setVisibility(View.GONE);
+            userName = getIntent().getStringExtra("userName");
+            sectorName = getIntent().getStringExtra("sectorName");
+            addNewUser.setVisibility(View.GONE);
+            addnewsector.setVisibility(View.GONE);
+            addnewdevice.setVisibility(View.VISIBLE);
+            NameD.setHint("Enter the QR code");
         }
 
 
@@ -343,7 +352,7 @@ public class AdminAddNew extends Activity {
             }
         });
 
-        // case 5 and case 7
+        // case 5 (add device) and case 7(change device name) and case 8 (type QR Code)
         savedevice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -369,7 +378,7 @@ public class AdminAddNew extends Activity {
                             activityadminStack.push("AdminPage", startNewActivityIntent);
                         }
                     }
-                }else {
+                }else if (usecase == 5) {
                     if (name.equals("")) {
                         Toast.makeText(AdminAddNew.this, "Device name cannot be empty", Toast.LENGTH_SHORT).show();
                     } else if (name.contains(" ")) {
@@ -393,6 +402,58 @@ public class AdminAddNew extends Activity {
                             ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
                             startNewActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             activityadminStack.push("AdminPage", startNewActivityIntent);
+                        }
+                    }
+                }else if (usecase == 8)
+                {
+                    if (name.equals("")) {
+                        Toast.makeText(AdminAddNew.this, "Device name cannot be empty", Toast.LENGTH_SHORT).show();
+                    }else{
+                        boolean boolresult = true;
+                        if (name != null && name.length() == 20 && name.contains("_")) {
+                            deviceinformation = new String[5];
+                            int count = 0;
+                            for (String substring: name.split("_")){
+                                switch(count)
+                                {
+                                    case 0: deviceinformation[0] = substring; break; // companyname
+                                    case 1: deviceinformation[1] = substring; break; // location
+                                    case 2: deviceinformation[2] = substring; break; // devicetype
+                                    case 3: deviceinformation[3] = substring; break; // devicedetail
+                                    case 4: deviceinformation[4] = substring; break; // devicenode
+                                }
+                                count++;
+                            }
+                            int devicenode = Integer.parseInt(deviceinformation[4]);
+                            if (DatabaseManager.getInstance().getDeviceNodeList().contains(devicenode)) {
+                                boolresult = false;
+                            }else if (deviceinformation[0].length()==2 && deviceinformation[1].length()==2 && deviceinformation[2].length()==2
+                                    && deviceinformation[3].length()==7 && deviceinformation[4].length()==3) {
+                                assignuser.setVisibility(View.GONE);
+                                addNewUser.setVisibility(View.GONE);
+                                addnewsector.setVisibility(View.GONE);
+                                assigndevice.setVisibility(View.GONE);
+                                addnewdevice.setVisibility(View.VISIBLE);
+                            }else {boolresult = false;}
+                        }else {boolresult = false;}
+                        if (boolresult==false) {
+                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(AdminAddNew.this.getParent());
+                            alertDialog.setTitle("QR Code Error");
+                            alertDialog.setMessage("Please ......................................?");
+                            alertDialog.setPositiveButton("Type QR Code Again", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    NameD.setText("");
+                                    dialog.cancel();
+                                }
+                            });
+                            alertDialog.setNegativeButton("Return to Admin Page", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent startNewActivityIntent = new Intent(AdminAddNew.this, AdminPage.class);
+                                    ActivityAdminStack activityadminStack = (ActivityAdminStack) getParent();
+                                    activityadminStack.push("Admin", startNewActivityIntent);
+                                }
+                            });
+                            alertDialog.show();
                         }
                     }
                 }

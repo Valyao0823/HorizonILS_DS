@@ -86,17 +86,15 @@ public class GlobalCalendar extends Activity{
             @Override
             public void onEventLongPress(final WeekViewEvent event, RectF eventRect) {
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View layout = inflater.inflate(R.layout.devicedialog, null, true);
+                View layout = inflater.inflate(R.layout.eventdialog, null, true);
                 AlertDialog.Builder builder = new AlertDialog.Builder(GlobalCalendar.this.getParent())
                         .setView(layout);
                 final AlertDialog alertDialog = builder.create();
-                Button loaddevice = (Button) layout.findViewById(R.id.loaddevice);
-                loaddevice.setText("Edit Event");
-                loaddevice.setOnClickListener(new View.OnClickListener() {
+                Button editevent = (Button) layout.findViewById(R.id.editevent);
+                editevent.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (event.getName().equals(loginname))
-                        {
+                        if (event.getName().equals(loginname)) {
                             View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
                             Bitmap bitmap = getScreenShot(rootView);
                             DataManager.getInstance().setBitmap(bitmap);
@@ -107,16 +105,14 @@ public class GlobalCalendar extends Activity{
                             activityStack.push("SecondActivity", startNewActivityIntent);
                             alertDialog.dismiss();
 
-                        }else
-                        {
+                        } else {
                             Toast.makeText(GlobalCalendar.this, "Do not have permission!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
 
-                Button scannerpage = (Button) layout.findViewById(R.id.scannerpage);
-                scannerpage.setText("Delete Event");
-                scannerpage.setOnClickListener(new View.OnClickListener() {
+                Button Deleteevent = (Button) layout.findViewById(R.id.deleteevent);
+                Deleteevent.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         alertDialog.dismiss();

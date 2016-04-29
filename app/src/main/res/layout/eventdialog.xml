@@ -32,35 +32,22 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.3"
-                android:text="Load Old"
-                android:id="@+id/loaddevice"/>
+                android:layout_weight="0.45"
+                android:text="Edit Event"
+                android:id="@+id/editevent"/>
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.05"
+                android:layout_weight="0.1"
                 android:clickable="false"
                 android:background="@color/transparent"
                 android:id="@+id/button1"/>
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.3"
-                android:text="Scanner"
-                android:id="@+id/scannerpage" />
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:clickable="false"
-                android:layout_weight="0.05"
-                android:background="@color/transparent"
-                android:id="@+id/button2" />
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.3"
-                android:text="Type QR Code"
-                android:id="@+id/TypeQR" />
+                android:layout_weight="0.45"
+                android:text="Delete Event"
+                android:id="@+id/deleteevent" />
         </LinearLayout>
         <LinearLayout
             android:orientation="vertical"
