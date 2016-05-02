@@ -37,6 +37,9 @@
         android:id="@+id/drawingpart"
         android:visibility="invisible"
         android:orientation="vertical">
+
+
+        
         <com.example.hesolutions.ils_ds.DrawingView
             android:id="@+id/drawing"
             android:layout_width="fill_parent"
