@@ -50,6 +50,7 @@ public class HomePage extends Activity {
     Handler myHandler;
     Runnable myRunnable;
     TCPClient mTcpClient;
+    WifiManager.WifiLock lock;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -108,7 +109,6 @@ public class HomePage extends Activity {
                     // after getting the right gw
                     // case 3: normal situation
                     if (mTcpClient != null && mTcpClient.isConnected()) {
-                        System.out.println("*************case3");
                         if (emergency == false) {
                             MakeAlert();
                         } else {
@@ -121,13 +121,11 @@ public class HomePage extends Activity {
                         }
                     } else if (mTcpClient != null && !mTcpClient.isConnected()) {
                         // case2: after timeout or any internet error, try to reconnect
-                        System.out.println("*************case2");
                         mTcpClient.stopClient();
                         new TCPConnection().execute("");
 
                     } else {
                         // case1: first connection
-                        System.out.println("*************case1");
                         new TCPConnection().execute("");
                     }
                 }
@@ -397,7 +395,6 @@ public class HomePage extends Activity {
             super.onProgressUpdate(values);
             String message = values[0];
             if (message.length()<=12 && message.length()>=10 && message.contains(",")) {
-                System.out.println("*********" + message);
                 String[] sub = message.split(",", 2);
                 if (sub[0].substring(0,5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 0 && Integer.parseInt(sub[1]) <= 100) {
                     Integer node = Integer.parseInt(sub[0].substring(5, 8));
@@ -417,10 +414,13 @@ public class HomePage extends Activity {
         WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifi.getConnectionInfo();
         String ssid = wifiInfo.getSSID();
-        System.out.println("***************** ssid " + ssid);
-        if (ssid.equals("\"Four-Faith\"")){
+        if (ssid.equals("\"Four-Faith\"") && lock==null){
+            lock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL, "LockTag");
+            lock.acquire();
             return true;
-        }
+        }else if (ssid.equals("\"Four-Faith\"") && lock.isHeld())
+        {
+            return true;}
         else {return false;}
     }
 
@@ -440,6 +440,8 @@ public class HomePage extends Activity {
 // connect to and enable the connection
         int netId = wifiManager.addNetwork(wc);
         wifiManager.enableNetwork(netId, true);
+        WifiManager.WifiLock lock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "LockTag");
+        lock.acquire();
         wifiManager.setWifiEnabled(true);
         return true;
     }

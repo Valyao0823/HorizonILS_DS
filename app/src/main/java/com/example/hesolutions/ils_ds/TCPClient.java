@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeoutException;
@@ -92,6 +93,7 @@ public class TCPClient {
             //create a socket to make the connection with the server
             socket = new Socket(serverAddr, SERVER_PORT);
             socket.setKeepAlive(true);
+
             try {
                 mRun = true;
                 Log.i("Debug", "inside try catch");

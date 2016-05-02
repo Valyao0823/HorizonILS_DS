@@ -1,5 +1,6 @@
 package com.example.hesolutions.ils_ds;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -11,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputFilter;
@@ -289,7 +291,7 @@ public class CalendarTask extends Activity {
                             if (weeks > 0) {
                                 if ((finishTime.after(startTime))) {
 
-                                    new AsyncTask<Void, Void, Void>()
+                                    AsyncTask asyncTask = new AsyncTask<Void, Void, Void>()
                                     {
                                         @Override
                                         protected void onPreExecute() {
@@ -506,7 +508,9 @@ public class CalendarTask extends Activity {
                                             activityStack.pop();
                                             DataManager.getInstance().setactivity("nothing");
                                         }
-                                    }.execute();
+                                    };
+                                    asyncTask.execute();
+                                    //StartAsyncTaskInParallel(asyncTask);
 
                                 } else {
                                     runOnUiThread(new Runnable() {
@@ -536,7 +540,19 @@ public class CalendarTask extends Activity {
                     if (switch1.isChecked() == false) {
                         if ((finishTime.after(startTime))) {
 
-                            new AsyncTask<Void, Void ,Void>()
+
+                            long id = DatabaseManager.getInstance().getMaxEventId() + 1;
+                            startTime.set(Calendar.SECOND, 0);
+                            finishTime.set(Calendar.SECOND, 0);
+                            System.out.println("******************* writing event");
+                            DatabaseManager.getInstance().addEvents(id, startTime.getTimeInMillis(), finishTime.getTimeInMillis(),
+                                    sectornamelist, cname, colorname, intensity);
+
+                            ActivityStack activityStack = (ActivityStack) getParent();
+                            activityStack.pop();
+                            DataManager.getInstance().setactivity("nothing");
+
+                            AsyncTask asyncTask = new AsyncTask<Void, Void ,Void>()
                             {
                                 @Override
                                 protected void onPreExecute() {
@@ -560,7 +576,9 @@ public class CalendarTask extends Activity {
                                     activityStack.pop();
                                     DataManager.getInstance().setactivity("nothing");
                                 }
-                            }.execute();
+                            };
+                            asyncTask.execute();
+                            //StartAsyncTaskInParallel(asyncTask);
 
                         } else {
                             runOnUiThread(new Runnable() {
@@ -569,9 +587,7 @@ public class CalendarTask extends Activity {
                                 }
                             });
                         }
-
                     }
-
                 }
             }
         });
@@ -673,6 +689,15 @@ public class CalendarTask extends Activity {
 
     }
 
+/*
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void StartAsyncTaskInParallel(AsyncTask<Void, Void, Void> task) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else
+            task.execute();
+    }
+*/
 
     private class MyCustomAdapter extends ArrayAdapter<Group> {
         private final Activity context;
