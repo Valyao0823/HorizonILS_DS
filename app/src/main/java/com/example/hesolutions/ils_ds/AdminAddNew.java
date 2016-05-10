@@ -244,7 +244,7 @@ public class AdminAddNew extends Activity {
                     }else if (Passwords.length() != 4){
                         Toast.makeText(getApplicationContext(), "The password must be 4 digits", Toast.LENGTH_LONG).show();
                         CODE.setText("");
-                    }else if (Passwords.equals("6665")) {
+                    }else if (Passwords.equals("0000")) {
                         Toast.makeText(AdminAddNew.this, "The password cannot be the same as for the Admin", Toast.LENGTH_SHORT).show();
                         CODE.setText("");
                     }else if (Passwords.isEmpty()) {
@@ -299,7 +299,7 @@ public class AdminAddNew extends Activity {
                     }else if (Passwords.length() != 4){
                         Toast.makeText(getApplicationContext(), "The password must be 4 digits", Toast.LENGTH_LONG).show();
                         CODE.setText("");
-                    }else if (Passwords.equals("6665")) {
+                    }else if (Passwords.equals("0000")) {
                         Toast.makeText(AdminAddNew.this, "The password cannot be the same as for the Admin", Toast.LENGTH_SHORT).show();
                         MSG.setText("");
                         CODE.setText("");
@@ -333,7 +333,9 @@ public class AdminAddNew extends Activity {
                 }else if (name.contains(" ")){
                     Toast.makeText(AdminAddNew.this, "No spaces allowed", Toast.LENGTH_SHORT).show();
                     NameS.setText("");
-                }else {
+                }else if (name.contains(",")) {
+                    Toast.makeText(AdminAddNew.this, "No special symbols allowed", Toast.LENGTH_SHORT).show();
+                } else {
                     ArrayList<String> sector = DatabaseManager.getInstance().getSectorList();
                     if (sector.contains(name))
                     {

@@ -12,6 +12,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +29,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
-
+import com.google.zxing.common.StringUtils;
 import com.mylibrary.WeekViewEvent;
 
 import java.text.SimpleDateFormat;
@@ -132,7 +133,6 @@ public class HomePage extends Activity {
             }
         }, today.getTime(), 1000 * 5);
 
-
         switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -178,6 +178,7 @@ public class HomePage extends Activity {
             @Override
             public void onClick(View v) {
                 DatabaseManager.getInstance().deleteRecord();
+                DatabaseManager.getInstance().removeAllevents();
                 if (recorddata.getVisibility() == View.VISIBLE) {recorddata.setText("");}
             }
         });
@@ -273,7 +274,7 @@ public class HomePage extends Activity {
                     String code = code1 + code2 + code3 + code4;
                     ArrayList<String> Passwordlist = DatabaseManager.getInstance().getPasswordList();
                     //TODO: make sure this check will be removed in final version :)
-                    if (code.equals("6665")) {
+                    if (code.equals("0000")) {
                         Intent startNewActivityIntent = new Intent(HomePage.this, TabViewAdmin.class);
                         startNewActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         clearPinCode();
@@ -394,19 +395,59 @@ public class HomePage extends Activity {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             String message = values[0];
+            /* for the second stage - first configration
             if (message.length()<=12 && message.length()>=10 && message.contains(",")) {
                 String[] sub = message.split(",", 2);
-                if (sub[0].substring(0,5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 0 && Integer.parseInt(sub[1]) <= 100) {
-                    Integer node = Integer.parseInt(sub[0].substring(5, 8));
-                    Integer feedback = Integer.parseInt(sub[1]);
-                    if (DatabaseManager.getInstance().getDeviceNodeList().contains(node)) {
-                        DatabaseManager.getInstance().updateDeviceFeedBack(node, feedback);
-                        ControlPage.RefreshList();
+                try {
+                    if (sub[0].substring(0, 5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 0 && Integer.parseInt(sub[1]) <= 100) {
+                        Integer node = Integer.parseInt(sub[0].substring(5, 8));
+                        Integer feedback = Integer.parseInt(sub[1]);
+                        if (DatabaseManager.getInstance().getDeviceNodeList().contains(node)) {
+                            DatabaseManager.getInstance().updateDeviceFeedBack(node, feedback);
+                            ControlPage.RefreshList();
+                        }
                     }
+                }catch (Exception e) {
+                    Log.e("FeedBack", "S: Error", e);
                 }
             }
-        }
+            */
+            // for the second configration
+            if (message.contains(",")){
+                String[] sub = message.split(",",2);
+                try {
+                    if (sub[0].substring(0, 5).equals("+RCV:") && sub[1].contains("-")) {
+                        Integer node = Integer.parseInt(sub[0].substring(5, 8));
+                        int count = 0;
+                        String[] feedback = new String[5];
+                        for (String subdiv: sub[1].split("-") )
+                        {
+                            switch(count)
+                            {
+                                case 0: break;
+                                case 1: feedback[0] = subdiv; break; // companyname
+                                case 2: feedback[1] = subdiv; break; // motion
+                                case 3: feedback[2] = subdiv; break; // temp
+                                case 4: feedback[3] = subdiv; break; // humi
+                                case 5: feedback[4] = subdiv; break; // lightintensity
+                            }
+                            count++;
+                        }
 
+                        int intensity = Integer.parseInt(feedback[4]);
+                        if (DatabaseManager.getInstance().getDeviceNodeList().contains(node)) {
+                            System.out.println("*******" + node + " :" +intensity);
+                            DatabaseManager.getInstance().updateDeviceFeedBack(node, intensity);
+                            ControlPage.RefreshList();
+                        }
+                    }
+                }catch (Exception e) {
+                    Log.e("FeedBack", "S: Error", e);
+                }
+            }
+
+
+        }
     }
 
     public boolean CheckSSID()

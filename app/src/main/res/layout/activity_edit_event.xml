@@ -33,6 +33,7 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text=" START TIME    "
             android:id="@+id/textView2"
+            android:layout_marginRight="25dp"
             android:layout_alignParentTop="true"
             android:layout_marginTop="20dp"
             android:layout_alignParentLeft="true"
@@ -51,7 +52,8 @@
             android:layout_below="@+id/textView2"
             android:layout_marginTop="10dp"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/textView3" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -66,7 +68,7 @@
             android:layout_below="@+id/startdate"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            />
+            android:layout_alignEnd="@+id/startdate" />
 
 
         <TextView
@@ -75,9 +77,9 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text=" FINISH TIME    "
             android:id="@+id/textView3"
-            android:layout_marginTop="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_above="@+id/startdate" />
+            android:layout_marginLeft="25dp"
+            android:layout_alignTop="@+id/textView2"
+            android:layout_toEndOf="@+id/textView2" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -138,13 +140,14 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/starttime"
             android:background="@drawable/backrec"
             android:layout_alignParentRight="true"
             android:layout_alignLeft="@+id/starttime"
             android:layout_alignEnd="@+id/finishtime"
             android:layout_marginRight="30dp"
-            android:layout_above="@+id/Intensity" >
+            android:layout_marginTop="20dp"
+            android:layout_above="@+id/Intensity"
+            android:layout_below="@+id/starttime">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -170,8 +173,9 @@
             android:id="@+id/Intensity"
             android:text="INTENSITY"
             android:textAppearance="?android:attr/textAppearanceLarge"
+            android:singleLine="true"
+            android:layout_alignParentLeft="true"
             android:layout_above="@+id/seekBar"
-            android:layout_toStartOf="@+id/cancelTOcalendar"
             android:layout_alignEnd="@+id/starttime" />
         <TextView
             android:layout_width="wrap_content"

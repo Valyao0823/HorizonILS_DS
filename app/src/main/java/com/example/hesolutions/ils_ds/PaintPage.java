@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -162,7 +163,7 @@ public class PaintPage extends Activity{
             public void onClick(View v) {
                 AlertDialog.Builder newDialog = new AlertDialog.Builder(PaintPage.this);
                 newDialog.setTitle("New drawing");
-                newDialog.setMessage("Start new drawing (you will lose the current drawing)?");
+                newDialog.setMessage("Start new drawing (you will lose the current drawing?");
                 newDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         drawView.startNew();
@@ -306,8 +307,7 @@ public class PaintPage extends Activity{
                         Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG)
-                    .show();
+            Log.e("Paint", "S: Error", e);
         }
 
     }

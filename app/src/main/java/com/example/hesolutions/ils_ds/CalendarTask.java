@@ -2,7 +2,6 @@ package com.example.hesolutions.ils_ds;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -509,20 +508,20 @@ public class CalendarTask extends Activity {
                                             DataManager.getInstance().setactivity("nothing");
                                         }
                                     };
-                                    asyncTask.execute();
-                                    //StartAsyncTaskInParallel(asyncTask);
+                                    //asyncTask.execute();
+                                    StartAsyncTaskInParallel(asyncTask);
 
                                 } else {
                                     runOnUiThread(new Runnable() {
                                         public void run() {
-                                            Toast.makeText(CalendarTask.this, "Invalid time", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(CalendarTask.this, "Invalid time.", Toast.LENGTH_LONG).show();
                                         }
                                     });
                                 }
                             } else {
                                 runOnUiThread(new Runnable() {
                                     public void run() {
-                                        Toast.makeText(CalendarTask.this, "Enter a valid week number (at least 1)", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(CalendarTask.this, "Enter a valid week number (at least 1).", Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -530,7 +529,7 @@ public class CalendarTask extends Activity {
                         } else {
                             runOnUiThread(new Runnable() {
                                 public void run() {
-                                    Toast.makeText(CalendarTask.this, "Please enter a number", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(CalendarTask.this, "Please enter a number.", Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -539,18 +538,6 @@ public class CalendarTask extends Activity {
                     // not repetition
                     if (switch1.isChecked() == false) {
                         if ((finishTime.after(startTime))) {
-
-
-                            long id = DatabaseManager.getInstance().getMaxEventId() + 1;
-                            startTime.set(Calendar.SECOND, 0);
-                            finishTime.set(Calendar.SECOND, 0);
-                            System.out.println("******************* writing event");
-                            DatabaseManager.getInstance().addEvents(id, startTime.getTimeInMillis(), finishTime.getTimeInMillis(),
-                                    sectornamelist, cname, colorname, intensity);
-
-                            ActivityStack activityStack = (ActivityStack) getParent();
-                            activityStack.pop();
-                            DataManager.getInstance().setactivity("nothing");
 
                             AsyncTask asyncTask = new AsyncTask<Void, Void ,Void>()
                             {
@@ -577,8 +564,8 @@ public class CalendarTask extends Activity {
                                     DataManager.getInstance().setactivity("nothing");
                                 }
                             };
-                            asyncTask.execute();
-                            //StartAsyncTaskInParallel(asyncTask);
+                            //asyncTask.execute();
+                            StartAsyncTaskInParallel(asyncTask);
 
                         } else {
                             runOnUiThread(new Runnable() {
@@ -689,15 +676,15 @@ public class CalendarTask extends Activity {
 
     }
 
-/*
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void StartAsyncTaskInParallel(AsyncTask<Void, Void, Void> task) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        else
+        }else
             task.execute();
     }
-*/
+
 
     private class MyCustomAdapter extends ArrayAdapter<Group> {
         private final Activity context;

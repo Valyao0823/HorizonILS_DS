@@ -560,12 +560,11 @@ public class ControlPage extends Activity {
     {
         super.onPause();
     }
+
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         // super.onBackPressed(); // Comment this super call to avoid calling finish()
     }
-
     @Override
     public void onDestroy()
     {

@@ -562,6 +562,18 @@ public class DatabaseManager {
         return $assertionsDisabled;
     }
 
+    public boolean removeAllevents()
+    {
+        try {
+            if (this.mDataBase != null) {
+                this.mDataBase.execSQL("DELETE FROM EventsTable");
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return $assertionsDisabled;
+    }
+
     //=============================================Record =======================================================
     public boolean addRecord(long time, String action)
     {

@@ -35,7 +35,7 @@ public class ActivityStack extends ActivityGroup {
 
     @Override
     public void onBackPressed() {
-        pop();
+        // super.onBackPressed(); // Comment this super call to avoid calling finish()
     }
 
     public void push(String id, Intent intent) {

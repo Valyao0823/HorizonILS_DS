@@ -158,10 +158,11 @@ public class GlobalCalendar extends Activity{
             @Override
             public void onEventClick(final WeekViewEvent event, RectF eventRect)
             {
-                Toast.makeText(GlobalCalendar.this, "Created by " + event.getName() + "\nStarting at "
+                String sector = event.getdeviceList().toString();
+                String replace = sector.replaceAll(",", " ");
+                Toast.makeText(GlobalCalendar.this, "Created by: " + event.getName() + "\nStarting at: "
                         + event.getStartTime().getTime()+
-                        "\nFinishing at " + event.getEndTime().getTime()
-                        +"\nName is: " + event.getName() + "\nSectors included: " + event.getdeviceList().toString(), Toast.LENGTH_SHORT).show();
+                        "\nFinishing at: " + event.getEndTime().getTime() + "\nSectors included: " + replace + "\nIntensity is: " + event.getIntensity(), Toast.LENGTH_SHORT).show();
             }
 
         };

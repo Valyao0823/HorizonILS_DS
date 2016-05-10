@@ -34,7 +34,7 @@
             android:id="@+id/companyName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Monkey Wrench"
+            android:text="Horizon"
             android:layout_marginRight="16dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"

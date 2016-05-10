@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -113,7 +114,13 @@ public class EditEvent extends Activity {
                 sectoradapter.add(group);
             }
         }
-        Group selected = new Group("Select All", false);
+
+        boolean selecteall = true;
+        for (Group group: sectoradapter)
+        {
+            if (group.getSelected()==false) selecteall=false;
+        }
+        Group selected = new Group("Select All", selecteall);
         sectoradapter.add(selected);
         deviceAdapter = new MyCustomAdapter(this, sectoradapter);
         sectorlistView.setAdapter(deviceAdapter);
@@ -269,6 +276,8 @@ public class EditEvent extends Activity {
             Group group = arrayList.get(position);
             TextView name = (TextView) convertView.findViewById(R.id.name);
             final EnhancedSwitch checked = (EnhancedSwitch) convertView.findViewById(R.id.checked);
+            checked.setSwitchMinWidth(300);
+            name.setPadding(50,0,0,0);
             name.setText(group.getName());
             checked.setCheckedProgrammatically(group.getSelected());
             checked.setTag(group);

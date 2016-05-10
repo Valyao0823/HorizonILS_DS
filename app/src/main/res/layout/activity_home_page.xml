@@ -12,10 +12,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="350dp"
+        android:layout_marginLeft="300dp"
         android:id="@+id/mainUi"
         android:layout_marginTop="140dp"
-        android:layout_marginRight="350dp"
+        android:layout_marginRight="300dp"
         android:layout_marginBottom="80dp">
         <TextView
             android:id="@+id/CODE1"
