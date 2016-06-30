@@ -117,7 +117,7 @@ public class HomePage extends Activity {
                             for (String devicename : devicelist) {
                                 // emergency is on: intensity = 100, control = 0
                                 int modulenumber = DatabaseManager.getInstance().getDeviceNode(devicename);
-                                mTcpClient.sendMessage("AT+TXA=" + modulenumber + "<100>");
+                                mTcpClient.sendMessage("AT+TXA=" + modulenumber + ",<100>");
                             }
                         }
                     } else if (mTcpClient != null && !mTcpClient.isConnected()) {
@@ -148,7 +148,7 @@ public class HomePage extends Activity {
                     // emergency is on: intensity = 100, control = 0
                     for (String devicename : devicelist) {
                         int modulenumber = DatabaseManager.getInstance().getDeviceNode(devicename);
-                        mTcpClient.sendMessage("AT+TXA=" + modulenumber + "<100>");
+                        mTcpClient.sendMessage("AT+TXA=" + modulenumber + ",<100>");
                     }
                 } else {
                     emergency = false;
@@ -395,8 +395,9 @@ public class HomePage extends Activity {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             String message = values[0];
-            /* for the second stage - first configration
+             //for the second stage - first configration
             if (message.length()<=12 && message.length()>=10 && message.contains(",")) {
+                System.out.println("*************" + message);
                 String[] sub = message.split(",", 2);
                 try {
                     if (sub[0].substring(0, 5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 0 && Integer.parseInt(sub[1]) <= 100) {
@@ -411,8 +412,10 @@ public class HomePage extends Activity {
                     Log.e("FeedBack", "S: Error", e);
                 }
             }
-            */
+
             // for the second configration
+
+            /*
             if (message.contains(",")){
                 String[] sub = message.split(",",2);
                 try {
@@ -444,9 +447,9 @@ public class HomePage extends Activity {
                 }catch (Exception e) {
                     Log.e("FeedBack", "S: Error", e);
                 }
+
             }
-
-
+*/
         }
     }
 
@@ -471,6 +474,7 @@ public class HomePage extends Activity {
         // setup a wifi configuration
         WifiConfiguration wc = new WifiConfiguration();
         wc.SSID = "\"Four-Faith\"";
+        // password is here
         wc.status = WifiConfiguration.Status.ENABLED;
         wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
         wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
@@ -481,8 +485,6 @@ public class HomePage extends Activity {
 // connect to and enable the connection
         int netId = wifiManager.addNetwork(wc);
         wifiManager.enableNetwork(netId, true);
-        WifiManager.WifiLock lock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "LockTag");
-        lock.acquire();
         wifiManager.setWifiEnabled(true);
         return true;
     }
