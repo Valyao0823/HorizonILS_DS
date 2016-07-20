@@ -395,9 +395,9 @@ public class HomePage extends Activity {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             String message = values[0];
+            System.out.println("*************" + message);
              //for the second stage - first configration
             if (message.length()<=12 && message.length()>=10 && message.contains(",")) {
-                System.out.println("*************" + message);
                 String[] sub = message.split(",", 2);
                 try {
                     if (sub[0].substring(0, 5).equals("+RCV:") && Integer.parseInt(sub[1]) >= 0 && Integer.parseInt(sub[1]) <= 100) {

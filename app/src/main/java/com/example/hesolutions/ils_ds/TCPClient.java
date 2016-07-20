@@ -20,8 +20,6 @@ import java.util.concurrent.TimeoutException;
 /**
  * Description
  *
- * @author Catalin Prata
- *         Date: 2/12/13
  */
 public class TCPClient {
 
@@ -55,6 +53,7 @@ public class TCPClient {
         if (mBufferOut != null && !mBufferOut.checkError()) {
             mBufferOut.println(message);
             mBufferOut.flush();
+            System.out.println("**********send:3 " + message);
         }
     }
 
